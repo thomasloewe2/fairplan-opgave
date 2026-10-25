@@ -1,0 +1,25 @@
+name: Backend build
+
+on:
+  push:
+    branches:
+      - refactor/domain-model
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore backend/backend.sln
+      - name: Build
+        run: dotnet build backend/backend.sln --configuration Release --no-restore
