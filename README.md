@@ -1,53 +1,100 @@
-# FairPlan – praktikopgave
+# FairPlan – administration af vagtplansdata
 
-Dette repository er et fork af Computations full-stack-skabelon til en hjemmeopgave om administration af planlægningsperioder, afsnit, personalegrupper, brugere og ansættelser.
+Full-stack webapplikation til administration af perioder, afsnit, personalegrupper, brugere og ansættelser i forbindelse med vagtplanlægning for hospitalslæger.
 
-## Status: fase 1 – arkitekturrefaktorering
+Projektet er udviklet som en praktikopgave til [Computation ApS / FairPlan](https://fairplan.dk/) med udgangspunkt i en [udleveret full-stack-skabelon](https://github.com/Frederik-Hoegh-Christensen/full_stack_template).
 
-Branchen `refactor/domain-model` indeholder første refaktorering:
-- Domæneentities og relationer er tilpasset opgavebeskrivelsen.
-- ASP.NET Identity og `User : IdentityUser<Guid>` er bevaret; login/autentifikation er uden for opgavens scope.
-- Transportmodeller ligger i `Application/Contracts`, med separat request/response.
-- Entity-til-response mapping ligger i `Application/Mapping`.
-- Ufærdige services, repositories og inkompatible template-controllers er fjernet frem for at efterlade `NotImplementedException`.
-- Core definerer repository-interfaces; concrete implementations og nye REST-endpoints kommer i fase 2.
+## Funktionalitet
 
-**Vigtigt:** Dette er et mellemtrin, ikke en færdig applikation. Der er endnu ingen FairPlan CRUD-endpoints i denne branch, og den gamle initial migration afspejler ikke den nye model. Anvend ikke eksisterende migration eller start med at oprette en database mod den. Migration, seeding, services, endpoints, frontend og tests færdiggøres i senere trin.
+- **Perioder:** Opret, rediger og slet planlægningsperioder. Overlappende perioder afvises.
+- **Organisering:** Administrer afsnit med farvekoder og personalegrupper. Enheder med tilknyttede ansættelser kan ikke slettes.
+- **Adgangsstyring:** Administrer brugere med rollerne Admin og/eller Personale samt ansættelser med afsnit, personalegruppe, arbejdstid og datoer.
+- **Personale:** Vis et skrivebeskyttet personaleoverblik for en valgt periode, baseret på overlappende ansættelser.
 
-## Teknologistak
+Tabellerne understøtter den søgning, sortering og filtrering, der er specificeret i opgaven. Forretningsregler valideres i backend, og fejl præsenteres i brugergrænsefladen.
 
-- Backend: ASP.NET Core / .NET 8, EF Core 8, ASP.NET Identity
-- Database: SQL Server LocalDB på Windows
-- Frontend: React, TypeScript, React Router 7, Tailwind CSS
+## Teknologier
 
-## Lokal klargøring
+| Område | Teknologi |
+| --- | --- |
+| Frontend | React, TypeScript, React Router, Tailwind CSS |
+| Backend | ASP.NET Core Web API (.NET 8) |
+| Dataadgang | Entity Framework Core 8 |
+| Database | SQL Server LocalDB |
+| Brugerdata | ASP.NET Identity |
 
-Forudsætninger: .NET 8 SDK, SQL Server LocalDB (Windows) og Node.js 20+.
+Backend er organiseret efter principperne i Onion Architecture:
+
+- `Core` – domæneentities og repository-interfaces
+- `Application` – use cases, forretningsregler, contracts og mapping
+- `Infrastructure` – EF Core og databaseadgang
+- `WebAPI` – REST-endpoints og dependency injection
+
+## Kom godt i gang
+
+**Forudsætninger:** Windows med SQL Server LocalDB, .NET 8 SDK og Node.js 20 eller nyere.
+
+1. Klon repository:
+
+   ```bash
+   git clone https://github.com/thomasloewe2/fairplan-opgave.git
+   cd fairplan-opgave
+   ```
+
+2. Start backend fra repositorys rodmappe:
+
+   ```bash
+   dotnet restore backend/backend.sln
+   dotnet run --project backend/src/WebAPI/WebAPI.csproj --launch-profile http
+   ```
+
+   API og Swagger: [http://localhost:5166/swagger](http://localhost:5166/swagger).
+
+3. Start frontend i en separat terminal:
+
+   ```bash
+   cd frontend
+   npm ci
+   npm run dev
+   ```
+
+   Frontend: [http://localhost:5173](http://localhost:5173).
+
+Connection string til LocalDB findes i `backend/src/WebAPI/appsettings.json` og kan ændres efter behov. Ved opstart i Development anvendes EF Core-migrations, og databasen initialiseres med eksempeldata.
+
+## Tests
+
+Kør backendens automatiserede tests fra repositorys rodmappe:
 
 ```bash
-dotnet restore backend/backend.sln
-dotnet build backend/backend.sln
 dotnet test backend/backend.sln
 ```
 
-WebAPI-start (i et terminalvindue):
-
-```bash
-dotnet run --project backend/src/WebAPI/WebAPI.csproj
-```
-
-Frontend (i et andet terminalvindue):
+Kør frontendens typekontrol:
 
 ```bash
 cd frontend
-npm ci
-npm run dev
+npm run typecheck
 ```
 
-Den nuværende frontend er stadig skabelonens velkomstside. Forbindelse til det fremtidige API følger i fase 3. Den aktuelle LocalDB-connection string ligger i `backend/src/WebAPI/appsettings.json`.
+## Projektstruktur
 
-## Arkitektur og beslutninger
+```text
+backend/
+  src/
+    Core/
+    Application/
+    Infrastructure/
+    WebAPI/
+  Tests/
+frontend/
+  app/
+docs/
+  decisions/
+```
 
-Læs [beslutningsnotatet](docs/decisions/0001-domain-and-layering.md) om AS-IS, TO-BE, DTO-placering, ASP.NET Identity og bevidste afgrænsninger.
+## Designbeslutninger og afgrænsning
 
-De eksisterende migrationer skal nulstilles, og en ny initial migration genereres, når EF Core-konfigurationen er færdiggjort i fase 2. Vi bevarer ikke data fra den oprindelige template.
+Væsentlige arkitekturvalg og alternativer er beskrevet i [beslutningsnotatet](docs/decisions/0001-domain-and-layering.md).
+
+ASP.NET Identity er bevaret fra skabelonen, men login, autentifikation og autorisation er ikke en del af opgavens funktionelle scope. Admin og Personale er forretningsroller på brugerens profil.
