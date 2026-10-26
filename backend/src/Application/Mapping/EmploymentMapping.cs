@@ -11,5 +11,5 @@ public static class EmploymentMapping
 
     // Caller must load User, Section and StaffGroup for personnel projections.
     public static PersonnelResponse ToPersonnelResponse(this Employment employment) =>
-        new(employment.Id, employment.User.FullName, employment.Section.Name, employment.StaffGroup.Name, employment.HoursPerWeek);
+        new(employment.Id, employment.User.FullName, employment.Section.Name, employment.Section.ColorHex, employment.StaffGroup.Name, employment.HoursPerWeek);
 }

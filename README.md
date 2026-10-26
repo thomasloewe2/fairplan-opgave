@@ -17,7 +17,7 @@ Tabellerne understøtter den søgning, sortering og filtrering, der er specifice
 
 | Område | Teknologi |
 | --- | --- |
-| Frontend | React, TypeScript, React Router, Tailwind CSS |
+| Frontend | React, TypeScript, React Router, TanStack Table, Tailwind CSS |
 | Backend | ASP.NET Core Web API (.NET 8) |
 | Dataadgang | Entity Framework Core 8 |
 | Database | SQL Server LocalDB |
@@ -70,12 +70,15 @@ Kør backendens automatiserede tests fra repositorys rodmappe:
 dotnet test backend/backend.sln
 ```
 
-Kør frontendens typekontrol:
+Kør frontendens typekontrol og produktionsbuild:
 
 ```bash
 cd frontend
 npm run typecheck
+npm run build
 ```
+
+Browserintegrationstests med Playwright kan køres mod en særskilt testdatabase, når API'et kører (se [frontendens vejledning](frontend/README.md)).
 
 ## Projektstruktur
 
@@ -95,6 +98,6 @@ docs/
 
 ## Designbeslutninger og afgrænsning
 
-Væsentlige arkitekturvalg og alternativer er beskrevet i [beslutningsnotatet](docs/decisions/0001-domain-and-layering.md).
+Væsentlige arkitekturvalg og alternativer er beskrevet i [ADR 0001](docs/decisions/0001-domain-and-layering.md), [ADR 0002](docs/decisions/0002-backend-data-and-rules.md) og [ADR 0003](docs/decisions/0003-frontend-ui.md).
 
 ASP.NET Identity er bevaret fra skabelonen, men login, autentifikation og autorisation er ikke en del af opgavens funktionelle scope. Admin og Personale er forretningsroller på brugerens profil.

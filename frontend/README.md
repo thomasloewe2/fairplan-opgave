@@ -1,100 +1,53 @@
-# Welcome to React Router!
+# FairPlan – frontend
 
-A modern, production-ready template for building full-stack React applications using React Router.
+React 19, TypeScript, React Router 7 (SPA), TanStack Table og Tailwind CSS. Grænsefladen anvender et ensartet mørkt tema uden dekorative gradients og box-shadows.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Start lokalt
 
-## Features
-
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+Kør .NET API'et på `http://localhost:5166` (med `--launch-profile http`), og start derefter frontenden:
 
 ```bash
-npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
+npm ci
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Åbn `http://localhost:5173`.
 
-## Building for Production
+API-adressen kan tilsidesættes med `VITE_API_BASE_URL` i `frontend/.env.local`. Ved brug af backendens HTTPS-launchprofil (`https://localhost:7170`) angives:
 
-Create a production build:
+```text
+VITE_API_BASE_URL=https://localhost:7170
+```
+
+Brug en adresse, der er tilgængelig fra browseren. Den eksisterende backend tillader `http://localhost:5173` via CORS.
+
+## Kvalitetskontrol
 
 ```bash
+npm run typecheck
 npm run build
 ```
 
-## Deployment
+## Funktioner
 
-### Docker Deployment
+- Perioder: CRUD og søgbar/sorterbar oversigt
+- Organisering: Afsnit med farvevælger og redigerbar HEX-kode; personalegrupper
+- Adgangsstyring: Brugere og ansættelser med formularvalidering
+- Personale: Skrivebeskyttet oversigt for en valgt periode
+- Genbrugelige tabeller med søgning, filtrering, sortering og paginering
+- Start- og slutdatoer bruger browserens indbyggede datovælger (mørkt tema, hvor browseren understøtter det); kalenderen åbner uden at flytte indholdet
+- Statusbeskeder har nedtælling, luk-knap og forsvinder efter 10 sekunder
+- Backendvalideringsfejl vises i formularerne
 
-This template includes three Dockerfiles optimized for different package managers:
+Login er uden for denne hjemmeopgaves scope.
 
-- `Dockerfile` - for npm
-- `Dockerfile.pnpm` - for pnpm
-- `Dockerfile.bun` - for bun
+## Browserintegrationstests
 
-To build and run using Docker:
+Playwright-testene i `tests/app.spec.ts` kontrollerer brugerflows mod et kørende .NET API og SQL Server. Da testene opretter og sletter data, skal de køres på en separat udviklings-/testdatabase.
 
 ```bash
-# For npm
-docker build -t my-app .
-
-# For pnpm
-docker build -f Dockerfile.pnpm -t my-app .
-
-# For bun
-docker build -f Dockerfile.bun -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+npx playwright install chromium
+npm run test:e2e
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+CI kan køre samme browserintegration automatisk ved Pull Requests.

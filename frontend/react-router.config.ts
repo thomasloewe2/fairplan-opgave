@@ -1,7 +1,4 @@
 import type { Config } from "@react-router/dev/config";
 
-export default {
-  // Config options...
-  // Server-side render by default, to enable SPA mode set this to `false`
-  ssr: true,
-} satisfies Config;
+// This admin client fetches from the .NET API in the browser, not during SSR.
+export default { ssr: false } satisfies Config;

@@ -37,11 +37,23 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<EmploymentService>();
 builder.Services.AddScoped<PersonnelService>();
 
-builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
-    policy.WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-        ?? ["http://localhost:5173"])
-        .AllowAnyHeader()
-        .AllowAnyMethod()));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5174",
+                "https://localhost:5173",
+                "https://127.0.0.1:5173"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
