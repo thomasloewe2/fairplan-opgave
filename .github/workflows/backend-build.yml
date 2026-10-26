@@ -1,16 +1,22 @@
-name: Backend build
+name: Backend build and tests
 
 on:
   push:
     branches:
-      - refactor/domain-model
+      - main
+      - 'feature/**'
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-build.yml'
   pull_request:
+    branches:
+      - main
     paths:
       - 'backend/**'
       - '.github/workflows/backend-build.yml'
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,3 +29,5 @@ jobs:
         run: dotnet restore backend/backend.sln
       - name: Build
         run: dotnet build backend/backend.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test backend/backend.sln --configuration Release --no-build
