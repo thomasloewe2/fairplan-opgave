@@ -1,4 +1,4 @@
-import { NavLink, Outlet, isRouteErrorResponse, Links, Meta, Scripts, ScrollRestoration } from "react-router";
+import { NavLink, Outlet, isRouteErrorResponse, Links, Meta, Scripts, ScrollRestoration, useLocation } from "react-router";
 import type { Route } from "./+types/root";
 import { AppIcon, type AppIconName } from "./components/AppIcon";
 import "./app.css";
@@ -24,6 +24,7 @@ const menu: { to: string; label: string; icon: AppIconName; end?: boolean }[] = 
 ];
 
 export default function App() {
+  const { pathname } = useLocation();
   return <div className="app-shell">
     <aside className="sidebar">
       <NavLink to="/" className="brand" aria-label="FairPlan – Forside">
@@ -32,7 +33,7 @@ export default function App() {
       <div className="nav-label">NAVIGATION</div>
       <nav className="sidebar-nav" aria-label="Hovednavigation">
         {menu.map((entry) => <NavLink key={entry.to} to={entry.to} end={entry.end}
-          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
+          className={({ isActive }) => `nav-item ${isActive || (entry.to === "/adgangsstyring/brugere" && pathname.startsWith("/adgangsstyring/")) ? "active" : ""}`}><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
       </nav>
       <div className="sidebar-footer">FairPlan · Vagtplanlægning</div>
     </aside>
