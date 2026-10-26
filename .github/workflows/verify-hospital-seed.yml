@@ -1,5 +1,7 @@
 name: Verify hospital seed data (temporary)
 
+# Final run of seed fixture and paginated CRUD scenarios.
+
 on:
   push:
     branches:
