@@ -1,18 +1,14 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Entities;
 
-namespace Domain.Interfaces.Repositories
+namespace Domain.Interfaces.Repositories;
+
+public interface IUserRepository
 {
-    public interface IUserRepository
-    {
-        Task<User> AddUserAsync(User user);
-        Task<List<object>> GetUsersAsync(); // make typed
-        Task<User> UpdateUserAsync(User user);
-        Task<bool> DeleteUserAsync(Guid userId);
-        Task<User> GetAdminInfoAsync();
-    }
+    Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> EmailExistsAsync(string normalizedEmail, Guid? excludeId = null, CancellationToken cancellationToken = default);
+    Task<bool> HasEmploymentsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task AddAsync(User user, CancellationToken cancellationToken = default);
+    Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+    Task DeleteAsync(User user, CancellationToken cancellationToken = default);
 }

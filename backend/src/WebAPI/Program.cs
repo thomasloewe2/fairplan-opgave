@@ -5,49 +5,28 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<VagtplanDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Retain ASP.NET Identity from the template; authentication/login is not part of this task.
 builder.Services.AddIdentity<User, IdentityRole<Guid>>()
-        .AddEntityFrameworkStores<VagtplanDbContext>()
-        .AddDefaultTokenProviders();
-
+    .AddEntityFrameworkStores<VagtplanDbContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<VagtplanDbContext>();
-    try
-    {
-        context.SeedData();
-    }
-    catch
-    {
-        //get fuckt
-    }
-}
-
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// The old seeding was coupled to removed entities and suppressed exceptions.
+// Database migrations and new idempotent seeding will be added in phase 2.
 app.UseHttpsRedirection();
-
-
 app.MapControllers();
 app.Run();
