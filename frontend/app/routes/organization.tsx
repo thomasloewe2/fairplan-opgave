@@ -62,7 +62,8 @@ export default function Organization() {
   };
   const sectionCols = useMemo<ColumnDef<Section>[]>(() => [
     { accessorKey: "name", header: "Afsnit" },
-    { accessorKey: "colorHex", header: "Farve", cell: ({ row }) => <span className="color-value">
+    { accessorKey: "colorHex", header: "Farve", filterFn: "equalsString",
+      cell: ({ row }) => <span className="color-value">
       <span className="color-dot" style={{ backgroundColor: row.original.colorHex }} />
       <span className="code-value">{row.original.colorHex}</span>
     </span> },
@@ -73,13 +74,25 @@ export default function Organization() {
       </div> },
   ], []);
   const groupCols = useMemo<ColumnDef<StaffGroup>[]>(() => [
-    { accessorKey: "name", header: "Personalegruppe" },
+    { accessorKey: "name", header: "Personalegruppe", filterFn: "equalsString" },
     { id: "actions", header: "Handlinger", enableSorting: false, enableGlobalFilter: false,
       cell: ({ row }) => <div className="row-actions">
         <button type="button" onClick={() => openGroup(row.original)}>Rediger</button>
         <button type="button" className="danger-link" onClick={() => groups.askDelete(row.original)}>Slet</button>
       </div> },
   ], []);
+
+  const colorOptions = useMemo(() =>
+    [...new Set(sections.data.map(section => section.colorHex.toUpperCase()))]
+      .sort().map(color => ({ value: color, label: color })),
+    [sections.data],
+  );
+  const groupOptions = useMemo(() =>
+    [...new Set(groups.data.map(group => group.name))]
+      .sort((a, b) => a.localeCompare(b, "da"))
+      .map(name => ({ value: name, label: name })),
+    [groups.data],
+  );
 
   return <>
     <PageHeader title="Organisering" description="Administrer afsnit og personalegrupper." />
@@ -89,14 +102,16 @@ export default function Organization() {
           <Button onClick={() => openSection()}>+ Opret afsnit</Button></div>
         <Notice message={sections.error} /><Notice kind="success" message={sections.message} />
         {sections.loading && !sections.data.length ? <Loading /> :
-          <DataTable columns={sectionCols} data={sections.data} searchPlaceholder="Søg efter afsnit…" />}
+          <DataTable columns={sectionCols} data={sections.data} searchPlaceholder="Søg efter afsnit…"
+            filters={[{ columnId: "colorHex", label: "Farve", options: colorOptions }]} />}
       </section>
       <section className="panel">
         <div className="panel-heading"><div><h2>Personalegrupper</h2><p className="muted">Faglige personalegrupper</p></div>
           <Button onClick={() => openGroup()}>+ Opret gruppe</Button></div>
         <Notice message={groups.error} /><Notice kind="success" message={groups.message} />
         {groups.loading && !groups.data.length ? <Loading /> :
-          <DataTable columns={groupCols} data={groups.data} searchPlaceholder="Søg efter gruppe…" />}
+          <DataTable columns={groupCols} data={groups.data} searchPlaceholder="Søg efter gruppe…"
+            filters={[{ columnId: "name", label: "Personalegruppe", options: groupOptions }]} />}
       </section>
     </div>
     {sections.editing && <Dialog title={sections.editing === "new" ? "Opret afsnit" : "Rediger afsnit"} onClose={sections.closeEdit}>
