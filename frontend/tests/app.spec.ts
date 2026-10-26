@@ -104,15 +104,16 @@ test("bruger med ansættelse kan ikke slettes før ansættelsen", async ({ page 
 test("personaleoversigten filtrerer på periode, navn og afsnit", async ({ page }) => {
   await page.goto("/personale");
   const select = page.getByLabel("Vælg planlægningsperiode");
-  await expect(select).toHaveValue("40000000-0000-0000-0000-000000000001");
-  await expect(page.getByRole("row", { name: /Anna Jensen/ })).toBeVisible();
-  await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
-
-  await page.getByRole("searchbox", { name: "Søg" }).fill("Anna");
+  await select.selectOption("40000000-0000-0000-0000-000000000001");
+  const search = page.getByRole("searchbox", { name: "Søg" });
+  await search.fill("Anna Jensen");
   await expect(page.getByRole("row", { name: /Anna Jensen/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Peter Hansen/ })).toHaveCount(0);
-  await page.getByRole("searchbox", { name: "Søg" }).fill("");
+  await search.fill("Peter Hansen");
+  await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
+  await search.fill("");
   await page.getByRole("combobox", { name: "Afsnit" }).selectOption("Medicinsk afsnit");
+  await search.fill("Peter Hansen");
   await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Anna Jensen/ })).toHaveCount(0);
 });
@@ -169,8 +170,9 @@ test("succesbeskeder får nedtælling, kan lukkes og forsvinder automatisk", asy
   await expect(status).toBeVisible();
   await expect(status).toHaveCount(0, { timeout: 13_000 });
 
-  // E-mail is unique, unlike a person's display name.
+  // Search by unique e-mail: the larger fixture includes many pages of users.
   for (const email of ["toast-person-two@example.test", "toast-person@example.test"]) {
+    await page.getByRole("searchbox", { name: "Søg" }).fill(email);
     const row = page.getByRole("row", { name: new RegExp(email.replace(".", "\\.")) });
     await row.getByRole("button", { name: "Slet" }).click();
     await dialog.getByRole("button", { name: "Slet", exact: true }).click();
@@ -181,7 +183,9 @@ test("ansættelser findes kun under Adgangsstyring og personale viser afsnitsfar
   await page.goto("/personale");
   const nav = page.getByRole("navigation", { name: "Hovednavigation" });
   await expect(nav.getByRole("link", { name: "Ansættelser" })).toHaveCount(0);
-  const acuteRow = page.getByRole("row", { name: /Akutafsnit/ });
+  await page.getByLabel("Vælg planlægningsperiode").selectOption("40000000-0000-0000-0000-000000000001");
+  await page.getByRole("combobox", { name: "Afsnit" }).selectOption("Akutafsnit");
+  const acuteRow = page.getByRole("row", { name: /Akutafsnit/ }).first();
   await expect(acuteRow.locator(".color-dot")).toBeVisible();
   await expect(acuteRow.locator(".color-dot")).toHaveCSS("background-color", "rgb(37, 99, 235)");
   await page.getByRole("link", { name: "Adgangsstyring" }).click();
@@ -197,8 +201,12 @@ test("ansættelsestabellen opdaterer navnene, selv når opslagsdata hentes sener
     });
   }
   await page.goto("/adgangsstyring/ansaettelser");
+  const search = page.getByRole("searchbox", { name: "Søg" });
+  await search.fill("Anna Jensen");
   await expect(page.getByRole("row", { name: /Anna Jensen/ })).toBeVisible();
+  await search.fill("Peter Hansen");
   await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
+  await search.fill("Ukendt bruger");
   await expect(page.getByRole("row", { name: /Ukendt bruger/ })).toHaveCount(0);
   await page.getByRole("link", { name: "Ansættelser" }).click();
   await expect(page.getByRole("navigation", { name: "Hovednavigation" })
@@ -221,9 +229,13 @@ test("personale viser afsnitsfarver fra sections når API svarer uden sectionCol
   });
 
   await page.goto("/personale");
+  await page.getByLabel("Vælg planlægningsperiode").selectOption("40000000-0000-0000-0000-000000000001");
+  const section = page.getByRole("combobox", { name: "Afsnit" });
+  await section.selectOption("Akutafsnit");
   const acute = page.getByRole("row", { name: /Akutafsnit/ }).first().locator(".color-dot");
-  const medical = page.getByRole("row", { name: /Medicinsk afsnit/ }).first().locator(".color-dot");
   await expect(acute).toHaveCSS("background-color", "rgb(37, 99, 235)");
+  await section.selectOption("Medicinsk afsnit");
+  const medical = page.getByRole("row", { name: /Medicinsk afsnit/ }).first().locator(".color-dot");
   await expect(medical).toHaveCSS("background-color", "rgb(5, 150, 105)");
 });
 
