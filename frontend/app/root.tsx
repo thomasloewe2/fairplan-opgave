@@ -33,7 +33,7 @@ export default function App() {
       <div className="nav-label">NAVIGATION</div>
       <nav className="sidebar-nav" aria-label="Hovednavigation">
         {menu.map((entry) => <NavLink key={entry.to} to={entry.to} end={entry.end}
-          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
       </nav>
       <div className="sidebar-footer">FairPlan · Administrationsportal</div>
     </aside>
