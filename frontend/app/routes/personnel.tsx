@@ -24,7 +24,9 @@ export default function Personnel() {
   const personnel = useResource(loadPersonnel, []);
   const columns = useMemo<ColumnDef<PersonnelRow>[]>(() => [
     { accessorKey: "fullName", header: "Navn" },
-    { accessorKey: "sectionName", header: "Afsnit" },
+    { accessorKey: "sectionName", header: "Afsnit", cell: ({ row }) =>
+      <span className="color-value"><span className="color-dot" aria-hidden="true"
+        style={{ backgroundColor: row.original.sectionColorHex }} />{row.original.sectionName}</span> },
     { accessorKey: "staffGroupName", header: "Personalegruppe" },
     { accessorKey: "hoursPerWeek", header: "Timer/uge",
       cell: ({ row }) => `${row.original.hoursPerWeek} timer` },

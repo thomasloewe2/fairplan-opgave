@@ -20,7 +20,6 @@ const menu: { to: string; label: string; icon: AppIconName; end?: boolean }[] = 
   { to: "/perioder", label: "Perioder", icon: "calendar" },
   { to: "/organisering", label: "Organisering", icon: "building" },
   { to: "/adgangsstyring/brugere", label: "Adgangsstyring", icon: "shield" },
-  { to: "/adgangsstyring/ansaettelser", label: "Ansættelser", icon: "briefcase" },
   { to: "/personale", label: "Personale", icon: "users" },
 ];
 
@@ -38,9 +37,6 @@ export default function App() {
       <div className="sidebar-footer">FairPlan · Vagtplanlægning</div>
     </aside>
     <div className="app-main">
-      <header className="topbar">
-        <span className="topbar-label">Vagtplanlægning</span>
-      </header>
       <main className="main-content"><Outlet /></main>
     </div>
   </div>;

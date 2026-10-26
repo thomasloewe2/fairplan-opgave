@@ -19,9 +19,36 @@ export function Button({ children, variant = "primary", className = "", ...props
   return <button {...props} className={`btn btn-${variant} ${className}`}>{children}</button>;
 }
 
-export function Notice({ message, kind = "error" }: { message: string | null; kind?: "error" | "success" | "info" }) {
-  if (!message) return null;
-  return <div role={kind === "error" ? "alert" : "status"} className={`notice notice-${kind}`}>{message}</div>;
+// Success notifications expire; inline validation can opt out using durationMs={0}.
+export function Notice({ message, kind = "error", durationMs = 10_000 }: {
+  message: string | null;
+  kind?: "error" | "success" | "info";
+  durationMs?: number;
+}) {
+  const [hidden, setHidden] = useState(false);
+  const [remaining, setRemaining] = useState(Math.ceil(durationMs / 1000));
+
+  useEffect(() => {
+    setHidden(false);
+    if (!message || durationMs <= 0) return;
+    const expires = Date.now() + durationMs;
+    setRemaining(Math.ceil(durationMs / 1000));
+    const interval = window.setInterval(() => {
+      const seconds = Math.max(0, Math.ceil((expires - Date.now()) / 1000));
+      setRemaining(seconds);
+      if (seconds === 0) setHidden(true);
+    }, 200);
+    return () => window.clearInterval(interval);
+  }, [message, durationMs]);
+
+  if (!message || hidden) return null;
+  return <div role={kind === "error" ? "alert" : "status"} className={`notice notice-${kind}`}>
+    <span className="notice-message">{message}</span>
+    <span className="notice-controls">
+      {durationMs > 0 && <span className="notice-countdown" aria-label={`Forsvinder om ${remaining} sekunder`}>{remaining}s</span>}
+      <button className="notice-close" type="button" aria-label="Luk besked" onClick={() => setHidden(true)}>×</button>
+    </span>
+  </div>;
 }
 
 export function Loading() {

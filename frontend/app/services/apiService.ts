@@ -53,6 +53,7 @@ export interface PersonnelRow {
   employmentId: string;
   fullName: string;
   sectionName: string;
+  sectionColorHex: string;
   staffGroupName: string;
   hoursPerWeek: number;
 }

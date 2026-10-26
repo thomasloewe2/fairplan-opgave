@@ -107,18 +107,6 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
   font-size: .75rem;
 }
 .app-main { width: calc(100% - 240px); min-width: 0; }
-.topbar {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 0 40px;
-  background: var(--sidebar);
-  border-bottom: 0;
-}
-.topbar-label { color: var(--muted); font-size: .86rem; font-weight: 550; }
-.topbar-context { color: var(--subtle); font-size: .8rem; }
 .main-content { max-width: 1450px; padding: 39px clamp(20px, 3vw, 48px) 85px; margin: 0 auto; }
 .page-header { display: flex; align-items: start; justify-content: space-between; gap: 18px; margin-bottom: 27px; }
 .page-header h1 { margin-bottom: 7px; line-height: 1.22; }
@@ -431,7 +419,6 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
   .nav-item { padding: 9px 12px; white-space: nowrap; }
   .nav-item.active { background: #2b2d50; }
   .app-main { width: 100%; }
-  .topbar { height: 54px; padding: 0 25px; }
   .main-content { padding-top: 30px; }
 }
 @media (max-width: 650px) {
@@ -453,4 +440,31 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
 }
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation: none; }
+}
+
+/* Dismissible status notifications, styled in the shared dark palette. */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #292b48;
+  border: 1px solid #3b4066;
+  color: var(--text);
+  animation: notice-enter 220ms ease-out both;
+}
+.notice-success { background: #173d43; border-color: #276b70; color: #c7f6f3; }
+.notice-error { background: #492936; border-color: #824558; color: #ffdae0; }
+.notice-info { background: #283550; border-color: #435c80; color: #d5e6fc; }
+.notice-message { min-width: 0; overflow-wrap: anywhere; }
+.notice-controls { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.notice-countdown { min-width: 28px; color: inherit; opacity: .8; text-align: right; font-variant-numeric: tabular-nums; font-size: .79rem; }
+.notice-close { width: 28px; height: 28px; padding: 0; color: inherit; background: transparent; border: 0; border-radius: 4px; font-size: 1.35rem; line-height: 1; }
+.notice-close:hover { background: #ffffff1c; }
+@keyframes notice-enter {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notice { animation: none; }
 }
