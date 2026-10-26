@@ -22,21 +22,16 @@ public class VagtplanDbContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(u => u.FullName).IsRequired().HasMaxLength(100);
-
-            // Identity's default EmailIndex is not unique. The domain requires a unique email.
-            // Populate NormalizedEmail consistently when creating/updating users.
+            // ASP.NET Identity's default EmailIndex is non-unique. Make it unique for this domain.
             entity.HasIndex(u => u.NormalizedEmail).IsUnique().HasDatabaseName("EmailIndex");
-
-            entity.HasMany(u => u.Employments)
-                .WithOne(e => e.User)
-                .HasForeignKey(e => e.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(u => u.Employments).WithOne(e => e.User)
+                .HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Period>(entity =>
         {
             entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
+            entity.ToTable(t => t.HasCheckConstraint("CK_Period_Dates", "[StartDate] < [EndDate]"));
         });
 
         modelBuilder.Entity<Section>(entity =>
@@ -52,17 +47,17 @@ public class VagtplanDbContext : IdentityDbContext<User, IdentityRole<Guid>, Gui
 
         modelBuilder.Entity<Employment>(entity =>
         {
-            entity.HasOne(e => e.Section)
-                .WithMany(s => s.Employments)
-                .HasForeignKey(e => e.SectionId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_Employment_Dates", "[StartDate] < [EndDate]");
+                t.HasCheckConstraint("CK_Employment_Hours", "[HoursPerWeek] >= 0 AND [HoursPerWeek] <= 37");
+            });
+            entity.HasOne(e => e.Section).WithMany(s => s.Employments)
+                .HasForeignKey(e => e.SectionId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.StaffGroup).WithMany(s => s.Employments)
+                .HasForeignKey(e => e.StaffGroupId).OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(e => e.StaffGroup)
-                .WithMany(s => s.Employments)
-                .HasForeignKey(e => e.StaffGroupId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(e => new { e.UserId, e.StartDate, e.EndDate });
         });
     }
 }
