@@ -1,6 +1,6 @@
 name: Frontend follow-up browser test
 
-# Final verification after notification-test cleanup.
+# Final verification including delayed employment lookups.
 
 on:
   push:
