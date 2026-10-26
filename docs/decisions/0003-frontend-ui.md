@@ -1,13 +1,11 @@
-# ADR 0003 – Frontend og brugergrænseflade
+# ADR 0003 – Frontend og brugeroplevelse (fase 3)
 
-Jeg har valgt React Router med klientsideindlæsning, fordi dette er et administrationsinterface, hvor brugerhandlingerne afhænger af REST API'et. Dermed undgår jeg at indføre server-side dataloaders i React ved siden af .NET-backenden.
+Jeg valgte **React Router i SPA-tilstand** med en fælles TypeScript-API-klient til .NET-backenden. Her gav klientsideindlæsning mere mening for mig end SSR eller server-side loaders: Backend ejer allerede API'et og forretningsreglerne.
 
-Til tabellerne bruger jeg TanStack Table. Det giver søgning, sortering, filtrering og paginering med ensartet adfærd på siderne, samtidig med at jeg selv kan forme det visuelle udtryk med Tailwind/CSS. Alternativet var at implementere tabelfunktionerne selv, men det ville give mere vedligeholdelsesarbejde for de samme krav.
+Jeg valgte **TanStack Table** til søgning, sortering, filtrering og paginering frem for at implementere tabellogikken selv. Fordi biblioteket er *headless*, kunne jeg forme et konsekvent, responsivt dark theme med Tailwind/CSS. Jeg endte med afdæmpet navigation, tydelig kontrast mellem flader og færre dekorative borders og effekter.
 
-Til afsnitsfarver har jeg valgt browserens indbyggede `input type="color"` sammen med et tekstfelt til HEX. Det undgår en ekstra afhængighed, men lader brugeren både vælge farven visuelt og indtaste den præcist.
+Jeg prioriterede enkel betjening i formularerne: Afsnit har både en visuel HTML-farvevælger og et redigerbart HEX-felt; statusbeskeder kan lukkes og forsvinder efter ti sekunder. Jeg afprøvede også en specialbygget datovælger, men den flyttede formularens indhold og gav dårligere UX. Derfor gik jeg tilbage til browserens `input type="date"` med `color-scheme: dark`. Jeg accepterer, at popupens præcise farver og scrolling styres af browseren.
 
-Til datoer bruger jeg browserens indbyggede `input type="date"` med `color-scheme: dark`. Jeg havde først forsøgt en specialbygget kalender, men den skubbede til formularens øvrige indhold. Browserens eget overlay giver et enklere flow uden den forskydning; udseende og scrolling varierer dog lidt med browser og styres ikke fuldt ud af CSS.
+Frontend giver hurtig feltvalidering, men backend er fortsat ansvarlig for regler og fejl. Under integrationen blev det også tydeligt, hvor vigtigt det er at skelne mellem **API-adresse** (`VITE_API_BASE_URL`) og **CORS-origin**. Jeg har samlet API-kald og fejlhåndtering ét sted.
 
-Formularer laver enkel klientvalidering for hurtig feedback. Backend forbliver ansvarlig for forretningsreglerne, og dens valideringsbeskeder vises i grænsefladen.
-
-Denne løsning prioriterer et ensartet UI og et begrænset antal afhængigheder frem for et større, fuldt UI-komponentbibliotek.
+Jeg tilføjede GitHub Actions til frontend-typecheck/build og Playwright-tests mod frontend, API og SQL Server ved relevante Pull Requests. Det giver fælles, reproducerbar feedback og fanger fejl, som hverken typecheck eller isolerede servicetests nødvendigvis opdager. Der er CI, men ingen automatisk deployment.
