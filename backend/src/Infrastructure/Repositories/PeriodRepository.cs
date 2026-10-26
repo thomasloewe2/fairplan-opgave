@@ -13,6 +13,7 @@ public sealed class PeriodRepository(VagtplanDbContext db) : IPeriodRepository
     public Task<Period?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         db.Periods.FirstOrDefaultAsync(p => p.Id == id, ct);
 
+    // Inclusive date ranges overlap even when they only share a boundary day.
     public Task<bool> HasOverlapAsync(DateOnly startDate, DateOnly endDate, Guid? excludeId = null, CancellationToken cancellationToken = default) =>
         db.Periods.AnyAsync(p => (!excludeId.HasValue || p.Id != excludeId.Value)
             && p.StartDate <= endDate && startDate <= p.EndDate, cancellationToken);

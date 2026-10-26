@@ -39,6 +39,7 @@ public static class SeedData
         if (!await db.Periods.AnyAsync(p => p.Id == period2Id, ct))
             db.Periods.Add(new Period { Id = period2Id, Name = "December 2026",
                 StartDate = new DateOnly(2026, 12, 1), EndDate = new DateOnly(2026, 12, 31) });
+        // Persist the referenced entities before inserting employments with foreign keys.
         await db.SaveChangesAsync(ct);
 
         var employment1Id = Guid.Parse("50000000-0000-0000-0000-000000000001");

@@ -71,6 +71,7 @@ public sealed class EmploymentService(
             throw BusinessException.Invalid("Det valgte afsnit findes ikke.");
         if (await groups.GetByIdAsync(groupId, ct) is null)
             throw BusinessException.Invalid("Den valgte personalegruppe findes ikke.");
+        // Employments may change section or group over time, but not overlap for the same user.
         if (await repository.HasOverlapForUserAsync(userId, start, end, excludeId, ct))
             throw BusinessException.Conflict("Brugeren har allerede en ansættelse i den valgte periode.");
     }

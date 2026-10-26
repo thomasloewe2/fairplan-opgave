@@ -50,6 +50,7 @@ public sealed class UserService(IUserRepository repository)
 
         if (await repository.EmailExistsAsync(normalized, excludeId: id, cancellationToken: ct))
             throw BusinessException.Conflict("E-mailadressen er allerede i brug.");
+        // Existing employments require the Personnel role; removing it would invalidate them.
         if (user.IsPersonnel && !request.IsPersonnel && await repository.HasEmploymentsAsync(id, ct))
             throw BusinessException.Conflict("Personale-rollen kan ikke fjernes fra en bruger med ansættelser.");
 

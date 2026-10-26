@@ -13,12 +13,14 @@ public sealed class EmploymentRepository(VagtplanDbContext db) : IEmploymentRepo
     public Task<Employment?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         db.Employments.FirstOrDefaultAsync(e => e.Id == id, ct);
 
+    // Compare inclusive intervals for the same user; excludeId supports editing an existing employment.
     public Task<bool> HasOverlapForUserAsync(Guid userId, DateOnly startDate, DateOnly endDate,
         Guid? excludeId = null, CancellationToken cancellationToken = default) =>
         db.Employments.AnyAsync(e => e.UserId == userId
             && (!excludeId.HasValue || e.Id != excludeId.Value)
             && e.StartDate <= endDate && startDate <= e.EndDate, cancellationToken);
 
+    // Load related entities here because the personnel response includes their names.
     public async Task<IReadOnlyList<Employment>> GetForPeriodAsync(DateOnly periodStart,
         DateOnly periodEnd, CancellationToken ct = default) =>
         await db.Employments.AsNoTracking()

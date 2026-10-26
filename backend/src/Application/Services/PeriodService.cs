@@ -32,6 +32,7 @@ public sealed class PeriodService(IPeriodRepository repository)
         var period = await FindAsync(id, ct);
         Rules.DateInterval(request.StartDate, request.EndDate);
         var name = Rules.Name(request.Name, "Periodens navn");
+        // Exclude the period being edited so its existing dates do not conflict with themselves.
         if (await repository.HasOverlapAsync(request.StartDate, request.EndDate, excludeId: id, cancellationToken: ct))
             throw BusinessException.Conflict("Perioden overlapper en eksisterende periode.");
 
