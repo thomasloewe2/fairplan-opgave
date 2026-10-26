@@ -1,5 +1,7 @@
 name: Frontend follow-up browser test
 
+# Final verification after notification-test cleanup.
+
 on:
   push:
     branches:

@@ -469,7 +469,8 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
   .notice { animation: none; }
 }
 
-/* Stable dark-mode calendar: explicit month/year controls, without native picker wheel scrolling. */
+/* Stable dark-mode calendar: explicit month/year controls, without native picker wheel scrolling.
+   Date fields use a single column so the calendar never becomes cramped in a narrow dialog. */
 .date-field { position: relative; }
 .date-input-row { position: relative; display: flex; align-items: center; }
 .date-input-row input { padding-right: 44px; }
@@ -522,3 +523,5 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
 .date-day.today { color: var(--accent); font-weight: 700; }
 .date-day.selected, .date-day.selected:hover { color: #fff; background: var(--accent-bg); }
 .date-calendar-footer { display: flex; justify-content: flex-end; padding-top: 12px; }
+
+.form-grid:has(.date-field) { grid-template-columns: minmax(0, 1fr); gap: 0; }
