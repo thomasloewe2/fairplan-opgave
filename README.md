@@ -54,6 +54,22 @@ API: `http://localhost:5166` · Swagger: [http://localhost:5166/swagger](http://
 
 Når backend starter med launch-profilen `http` eller `https`, anvendes miljøet **Development**. Her udfører EF Core automatisk eksisterende migrations (`MigrateAsync`) og derefter `SeedData.InitializeAsync`. På en frisk LocalDB oprettes databasen `FairPlanDb` med eksempelperioder, afsnit, personalegrupper, brugere og ansættelser. Seedning ved efterfølgende opstarter giver ikke dubletter af disse eksempelposter.
 
+### Demodata til afprøvning
+
+Den udvidede seeder opretter på en **tom database**:
+
+| Data | Antal | Eksempler |
+| --- | ---: | --- |
+| Perioder | 6 | Oktober 2026 til marts 2027, hver som en hel kalendermåned |
+| Afsnit | 12 | Akutafsnit, intensiv, medicinske og kirurgiske sengeafsnit, fødegang, barsel, neonatal, børn og psykiatri |
+| Personalegrupper | 5 | Læger, sygeplejersker, social- og sundhedsassistenter, jordemødre og pædagoger |
+| Brugere | 76 | 74 personer med Personale-rollen, heraf nogle administratorer, og 2 rene administratorer |
+| Ansættelser | 79 | Fuldtid/deltid, forskellige ansættelsesperioder og 5 afdelingsoverflytninger fra januar 2027 |
+
+Navne og stillinger er **fiktive**, og nye e-mailadresser bruger det reserverede `.example`-domæne. Dataene illustrerer ansættelser og tilhørsforhold – **ikke faktiske vagtplaner eller garanteret døgnnormering**.
+
+De oprindelige seed-ID'er (bl.a. Anna Jensen, Peter Hansen og november/december 2026) bevares. Seederen opretter kun manglende seedposter, overskriver ikke manuelt redigerede poster og undgår at indsætte overlappende perioder/ansættelser. Har du allerede oprettet data lokalt, kan de konkrete antal derfor afvige fra tabellen. Et helt reproducerbart datasæt fås ved opstart mod en ny, tom udviklingsdatabase.
+
 Connection string findes i `backend/src/WebAPI/appsettings.json` og kan tilsidesættes via konfiguration, fx miljøvariablen `ConnectionStrings__DefaultConnection`. Nye ændringer i EF-modellen kræver fortsat, at der **oprettes en migration**; automatisk opstart anvender kun migrations, som allerede findes. Migrations og seeding køres **ikke automatisk i Production**.
 
 **3. Start frontend** i en anden terminal fra repositoryets rodmappe:
