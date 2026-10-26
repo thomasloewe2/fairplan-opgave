@@ -1,0 +1,46 @@
+name: Generate initial EF Core migration (one-time)
+
+on:
+  push:
+    branches:
+      - feature/backend-persistence
+    paths:
+      - '.github/workflows/generate-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install EF Core tools
+        run: dotnet tool install --global dotnet-ef --version 8.0.14
+      - name: Generate initial migration from the actual EF model
+        run: |
+          dotnet ef migrations add InitialFairPlan \
+            --project backend/src/Infrastructure/Infrastructure.csproj \
+            --startup-project backend/src/WebAPI/WebAPI.csproj \
+            --context VagtplanDbContext \
+            --output-dir Migrations
+      - name: Verify SQL script can be generated
+        run: |
+          dotnet ef migrations script --idempotent \
+            --project backend/src/Infrastructure/Infrastructure.csproj \
+            --startup-project backend/src/WebAPI/WebAPI.csproj \
+            --context VagtplanDbContext --output /tmp/fairplan.sql
+      - name: Commit generated migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(database): scaffold initial FairPlan migration"
+            git push origin HEAD:feature/backend-persistence
+          fi
