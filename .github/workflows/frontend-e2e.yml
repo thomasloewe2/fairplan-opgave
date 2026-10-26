@@ -51,7 +51,11 @@ jobs:
           echo $! >/tmp/fairplan-api.pid
           for attempt in $(seq 1 45); do
             if curl -fsS http://localhost:5166/api/periods >/tmp/periods.json; then
-              jq -e 'length == 2' /tmp/periods.json
+              jq -e 'length == 6 and ([.[].name] | index("Oktober 2026") != null and index("Marts 2027") != null)' /tmp/periods.json
+              curl -fsS http://localhost:5166/api/sections | jq -e 'length == 12' >/dev/null
+              curl -fsS http://localhost:5166/api/staffgroups | jq -e 'length == 5' >/dev/null
+              curl -fsS http://localhost:5166/api/users | jq -e 'length == 76' >/dev/null
+              curl -fsS http://localhost:5166/api/employments | jq -e 'length == 79' >/dev/null
               exit 0
             fi
             sleep 3
