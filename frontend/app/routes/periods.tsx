@@ -52,7 +52,11 @@ export default function Periods() {
   const openEdit = (period: Period) => { setDialogKey(k => k + 1); crud.edit(period); };
   const columns = useMemo<ColumnDef<Period>[]>(() => [
     { accessorKey: "name", header: "Navn" },
-    { accessorKey: "startDate", header: "Startdato", cell: ctx => formatDate(ctx.row.original.startDate) },
+    { accessorKey: "startDate", header: "Startdato",
+      // A period can span New Year; include it in each calendar year it overlaps.
+      filterFn: (row, _columnId, year: string) =>
+        row.original.startDate.slice(0, 4) <= year && year <= row.original.endDate.slice(0, 4),
+      cell: ctx => formatDate(ctx.row.original.startDate) },
     { accessorKey: "endDate", header: "Slutdato", cell: ctx => formatDate(ctx.row.original.endDate) },
     { id: "actions", header: "Handlinger", enableSorting: false, enableGlobalFilter: false,
       cell: ({ row }) => <div className="row-actions">
@@ -60,6 +64,16 @@ export default function Periods() {
         <button type="button" className="danger-link" onClick={() => crud.askDelete(row.original)}>Slet</button>
       </div> },
   ], []);
+
+  const yearOptions = useMemo(() => {
+    const years = new Set<string>();
+    for (const period of crud.data) {
+      const first = Number(period.startDate.slice(0, 4));
+      const last = Number(period.endDate.slice(0, 4));
+      for (let year = first; year <= last; year++) years.add(String(year).padStart(4, "0"));
+    }
+    return [...years].sort().map(year => ({ value: year, label: year }));
+  }, [crud.data]);
 
   const selected = crud.editing;
   return <>
@@ -69,7 +83,9 @@ export default function Periods() {
     <Notice message={crud.error} />
     <section className="panel">
       {crud.loading && !crud.data.length ? <Loading /> : <DataTable data={crud.data} columns={columns}
-        searchPlaceholder="Søg efter periode…" emptyText="Ingen perioder endnu. Opret den første periode." />}
+        searchPlaceholder="Søg efter periode…"
+        filters={[{ columnId: "startDate", label: "År", options: yearOptions }]}
+        emptyText="Ingen perioder fundet." />}
     </section>
     {selected && <Dialog title={selected === "new" ? "Opret periode" : "Rediger periode"} onClose={crud.closeEdit}>
       <PeriodEditor key={dialogKey} initial={selected === "new" ? empty : {

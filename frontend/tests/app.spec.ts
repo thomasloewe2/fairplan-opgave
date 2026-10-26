@@ -279,3 +279,56 @@ test("seed giver seks hele kalendermåneder og et bredt udsnit af sygehuspersona
   await page.getByRole("combobox", { name: "Personalegruppe" }).selectOption("Jordemødre");
   await expect(page.getByRole("row", { name: /Fødegang|Barselsafsnit/ }).first()).toBeVisible();
 });
+
+test("perioder kan filtreres efter år uafhængigt af søgning og sortering", async ({ page }) => {
+  await page.goto("/perioder");
+  const yearFilter = page.getByRole("combobox", { name: "År" });
+  await expect(yearFilter.locator("option")).toHaveText(["Alle", "2026", "2027"]);
+
+  await yearFilter.selectOption("2026");
+  await expect(page.getByRole("row", { name: /Oktober 2026/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Januar 2027/ })).toHaveCount(0);
+
+  const search = page.getByRole("searchbox", { name: "Søg" });
+  await search.fill("Januar");
+  await expect(page.getByRole("row", { name: /Januar 2027/ })).toHaveCount(0);
+  await yearFilter.selectOption("2027");
+  await expect(page.getByRole("row", { name: /Januar 2027/ })).toBeVisible();
+
+  await search.fill("");
+  await page.getByRole("button", { name: /Startdato/ }).click();
+  await page.getByRole("button", { name: /Startdato/ }).click();
+  await expect(page.locator("tbody tr").first()).toContainText("Marts 2027");
+  await yearFilter.selectOption("");
+  await expect(page.getByRole("row", { name: /Oktober 2026/ })).toBeVisible();
+});
+
+test("organisering har selvstændige filtre i begge paneler", async ({ page }) => {
+  await page.goto("/organisering");
+  const panels = page.locator(".organization-grid > section");
+  await expect(panels).toHaveCount(2);
+
+  const sections = panels.first();
+  const colorFilter = sections.getByRole("combobox", { name: "Farve" });
+  await colorFilter.selectOption("#2563EB");
+  await expect(sections.getByRole("row", { name: /Akutafsnit/ })).toBeVisible();
+  await expect(sections.getByRole("row", { name: /Medicinsk afsnit/ })).toHaveCount(0);
+  await sections.getByRole("searchbox", { name: "Søg" }).fill("Medicinsk");
+  await expect(sections.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
+  await colorFilter.selectOption("#059669");
+  await expect(sections.getByRole("row", { name: /Medicinsk afsnit/ })).toBeVisible();
+
+  const groups = panels.last();
+  const groupFilter = groups.getByRole("combobox", { name: "Personalegruppe" });
+  await groupFilter.selectOption({ label: "Læger" });
+  await expect(groups.getByRole("row", { name: /Læger/ })).toBeVisible();
+  await expect(groups.getByRole("row", { name: /Jordemødre/ })).toHaveCount(0);
+  await groups.getByRole("searchbox", { name: "Søg" }).fill("Jordemødre");
+  await expect(groups.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
+  await groupFilter.selectOption({ label: "Jordemødre" });
+  await expect(groups.getByRole("row", { name: /Jordemødre/ })).toBeVisible();
+
+  // All controls remain on the same page: no added tabs or navigation.
+  await expect(sections.getByRole("heading", { name: "Afsnit" })).toBeVisible();
+  await expect(groups.getByRole("heading", { name: "Personalegrupper" })).toBeVisible();
+});
