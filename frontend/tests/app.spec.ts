@@ -75,6 +75,9 @@ test("bruger med ansættelse kan ikke slettes før ansættelsen", async ({ page 
   await dialog.getByLabel("Startdato").fill("2029-01-01");
   await dialog.getByLabel("Slutdato").fill("2029-06-30");
   await dialog.getByRole("button", { name: "Gem ansættelse" }).click();
+  await expect(dialog).toHaveCount(0);
+  // The table is paginated; re-open the persisted overview before searching.
+  await page.reload();
   await page.getByRole("searchbox", { name: "Søg" }).fill("UI-testperson");
   let employment = page.getByRole("row", { name: /UI-testperson/ });
   await expect(employment).toBeVisible();
