@@ -8,8 +8,8 @@ test("perioder kan oprettes, redigeres, søges og slettes", async ({ page }) => 
   await page.getByRole("button", { name: "+ Opret periode" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Navn").fill("UI-testperiode");
-  await dialog.getByLabel("Startdato").fill("2028-01-01");
-  await dialog.getByLabel("Slutdato").fill("2028-01-31");
+  await dialog.getByRole("textbox", { name: "Startdato" }).fill("2028-01-01");
+  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("2028-01-31");
   await dialog.getByRole("button", { name: "Gem periode" }).click();
 
   let row = page.getByRole("row", { name: /UI-testperiode/ });
@@ -69,8 +69,8 @@ test("bruger med ansættelse kan ikke slettes før ansættelsen", async ({ page 
   await dialog.getByLabel("Bruger").selectOption({ label: "UI-testperson (ui-person@example.test)" });
   await dialog.getByLabel("Afsnit").selectOption({ label: "Akutafsnit" });
   await dialog.getByLabel("Personalegruppe").selectOption({ label: "Læger" });
-  await dialog.getByLabel("Startdato").fill("2029-01-01");
-  await dialog.getByLabel("Slutdato").fill("2029-06-30");
+  await dialog.getByRole("textbox", { name: "Startdato" }).fill("2029-01-01");
+  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("2029-06-30");
   await dialog.getByRole("button", { name: "Gem ansættelse" }).click();
   let employment = page.getByRole("row", { name: /UI-testperson/ });
   await expect(employment).toBeVisible();
@@ -108,4 +108,75 @@ test("personaleoversigten filtrerer på periode, navn og afsnit", async ({ page 
   await page.getByRole("combobox", { name: "Afsnit" }).selectOption("Medicinsk afsnit");
   await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Anna Jensen/ })).toHaveCount(0);
+});
+
+test("datovælgeren fastholder måned og år og understøtter danske datoer", async ({ page }) => {
+  await page.goto("/perioder");
+  await page.getByRole("button", { name: "+ Opret periode" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Navn").fill("Kalender-testperiode");
+
+  await dialog.getByRole("button", { name: "Åbn kalender for Startdato" }).click();
+  const startCalendar = dialog.getByRole("group", { name: "Kalender for Startdato" });
+  await expect(startCalendar).toBeVisible();
+  await startCalendar.getByRole("combobox", { name: "År" }).selectOption("2030");
+  await startCalendar.getByRole("combobox", { name: "Måned" }).selectOption("0");
+  await startCalendar.hover();
+  await page.mouse.wheel(0, 450);
+  await expect(startCalendar.getByRole("combobox", { name: "År" })).toHaveValue("2030");
+  await expect(startCalendar.getByRole("combobox", { name: "Måned" })).toHaveValue("0");
+  await startCalendar.getByRole("button", { name: "Vælg 15.01.2030" }).click();
+  await expect(dialog.getByRole("textbox", { name: "Startdato" })).toHaveValue("15.01.2030");
+
+  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("31.01.2030");
+  await dialog.getByRole("button", { name: "Gem periode" }).click();
+  const row = page.getByRole("row", { name: /Kalender-testperiode/ });
+  await expect(row).toBeVisible();
+  await expect(row).toContainText("15.01.2030");
+  await expect(row).toContainText("31.01.2030");
+
+  await row.getByRole("button", { name: "Slet" }).click();
+  await dialog.getByRole("button", { name: "Slet", exact: true }).click();
+  await expect(row).toHaveCount(0);
+});
+
+test("succesbeskeder får nedtælling, kan lukkes og forsvinder automatisk", async ({ page }) => {
+  await page.goto("/adgangsstyring/brugere");
+  await page.getByRole("button", { name: "+ Opret bruger" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Fulde navn").fill("Toast-testperson");
+  await dialog.getByLabel("E-mail").fill("toast-person@example.test");
+  await dialog.getByRole("button", { name: "Gem bruger" }).click();
+
+  let status = page.getByRole("status").filter({ hasText: "Oprettet." });
+  await expect(status).toBeVisible();
+  await expect(status.getByText("10s")).toBeVisible();
+  await status.getByRole("button", { name: "Luk besked" }).click();
+  await expect(status).toHaveCount(0);
+
+  await page.getByRole("button", { name: "+ Opret bruger" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Oprettet." })).toHaveCount(0);
+  await dialog.getByLabel("Fulde navn").fill("Toast-testperson nummer to");
+  await dialog.getByLabel("E-mail").fill("toast-person-two@example.test");
+  await dialog.getByRole("button", { name: "Gem bruger" }).click();
+  status = page.getByRole("status").filter({ hasText: "Oprettet." });
+  await expect(status).toBeVisible();
+  await expect(status).toHaveCount(0, { timeout: 13_000 });
+
+  for (const name of ["Toast-testperson", "Toast-testperson nummer to"]) {
+    const row = page.getByRole("row", { name: new RegExp(name) });
+    await row.getByRole("button", { name: "Slet" }).click();
+    await dialog.getByRole("button", { name: "Slet", exact: true }).click();
+  }
+});
+
+test("ansættelser findes kun under Adgangsstyring og personale viser afsnitsfarver", async ({ page }) => {
+  await page.goto("/personale");
+  const nav = page.getByRole("navigation", { name: "Hovednavigation" });
+  await expect(nav.getByRole("link", { name: "Ansættelser" })).toHaveCount(0);
+  const acuteRow = page.getByRole("row", { name: /Akutafsnit/ });
+  await expect(acuteRow.locator(".color-dot")).toBeVisible();
+  await expect(acuteRow.locator(".color-dot")).toHaveAttribute("style", /background-color:/);
+  await page.getByRole("link", { name: "Adgangsstyring" }).click();
+  await expect(page.getByRole("link", { name: "Ansættelser" })).toBeVisible();
 });
