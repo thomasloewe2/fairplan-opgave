@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SubmitEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Link } from "react-router";
 import { DataTable } from "../components/DataTable";
@@ -18,7 +18,7 @@ function EmploymentForm({ initial, busy, error, cancel, save, users, sections, g
   const [value, setValue] = useState<EmploymentInput>(initial);
   const datesInvalid = !!value.startDate && !!value.endDate && value.startDate >= value.endDate;
   const hasOptions = users.some(u => u.isPersonnel) && sections.length > 0 && groups.length > 0;
-  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); if (!datesInvalid && value.startDate && value.endDate) void save(value); }}>
+  return <form onSubmit={(e: SubmitEvent<HTMLFormElement>) => { e.preventDefault(); if (!datesInvalid && value.startDate && value.endDate) void save(value); }}>
     {!hasOptions && <Notice kind="info" message="Opret først en bruger med Personale-rollen, et afsnit og en personalegruppe." />}
     <label className="field"><span>Bruger</span>
       <select required value={value.userId} onChange={e => setValue({ ...value, userId: e.target.value })}>

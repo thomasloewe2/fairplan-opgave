@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type SubmitEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../components/DataTable";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
@@ -15,7 +15,7 @@ function PeriodEditor({ initial, saving, error, onCancel, onSave }: {
 }) {
   const [values, setValues] = useState<PeriodInput>(initial);
   useEffect(() => { setValues(initial); }, [initial]);
-  function submit(e: FormEvent<HTMLFormElement>) {
+  function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!values.startDate || !values.endDate || values.startDate >= values.endDate) return;
     void onSave(values);

@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SubmitEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Link } from "react-router";
 import { DataTable } from "../components/DataTable";
@@ -12,7 +12,7 @@ function UserForm({ initial, busy, error, cancel, save }: {
 }) {
   const [value, setValue] = useState(initial);
   const hasRole = value.isAdmin || value.isPersonnel;
-  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); if (hasRole) void save(value); }}>
+  return <form onSubmit={(e: SubmitEvent<HTMLFormElement>) => { e.preventDefault(); if (hasRole) void save(value); }}>
     <label className="field"><span>Fulde navn</span>
       <input required maxLength={100} value={value.fullName} placeholder="F.eks. Anna Jensen"
         onChange={e => setValue({ ...value, fullName: e.target.value })} /></label>

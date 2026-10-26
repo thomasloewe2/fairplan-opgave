@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SubmitEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../components/DataTable";
 import { Button, ColorField, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
@@ -11,7 +11,7 @@ function SectionForm({ initial, busy, error, cancel, save }: {
 }) {
   const [value, setValue] = useState(initial);
   const validColor = /^#[0-9a-f]{6}$/i.test(value.colorHex);
-  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); if (validColor) void save(value); }}>
+  return <form onSubmit={(e: SubmitEvent<HTMLFormElement>) => { e.preventDefault(); if (validColor) void save(value); }}>
     <label className="field"><span>Afsnitsnavn</span>
       <input required maxLength={100} placeholder="F.eks. Akutafsnit" value={value.name}
         onChange={e => setValue({ ...value, name: e.target.value })} />
