@@ -181,3 +181,20 @@ test("ansættelser findes kun under Adgangsstyring og personale viser afsnitsfar
   await page.getByRole("link", { name: "Adgangsstyring" }).click();
   await expect(page.getByRole("link", { name: "Ansættelser" })).toBeVisible();
 });
+
+test("ansættelsestabellen opdaterer navnene, selv når opslagsdata hentes senere", async ({ page }) => {
+  // Reproduce the actual race observed in CI: employment rows arrive before lookup data.
+  for (const endpoint of ["users", "sections", "staffgroups"]) {
+    await page.route(`**/api/${endpoint}`, async route => {
+      await new Promise(resolve => setTimeout(resolve, 900));
+      await route.continue();
+    });
+  }
+  await page.goto("/adgangsstyring/ansaettelser");
+  await expect(page.getByRole("row", { name: /Anna Jensen/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Peter Hansen/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Ukendt bruger/ })).toHaveCount(0);
+  await page.getByRole("link", { name: "Ansættelser" }).click();
+  await expect(page.getByRole("navigation", { name: "Hovednavigation" })
+    .getByRole("link", { name: "Adgangsstyring" })).toHaveClass(/active/);
+});
