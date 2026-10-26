@@ -1,4 +1,5 @@
 import { useMemo, useState, type SubmitEvent } from "react";
+import { Link, useLocation } from "react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../components/DataTable";
 import { Button, ColorField, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
@@ -48,6 +49,8 @@ function GroupForm({ initial, busy, error, cancel, save }: {
 }
 
 export default function Organization() {
+  const { pathname } = useLocation();
+  const showGroups = pathname === "/organisering/personalegrupper";
   const sections = useCrud(api.sections);
   const groups = useCrud(api.staffGroups);
   const [sectionKey, setSectionKey] = useState(0);
@@ -96,24 +99,25 @@ export default function Organization() {
 
   return <>
     <PageHeader title="Organisering" description="Administrer afsnit og personalegrupper." />
-    <div className="organization-grid">
-      <section className="panel">
-        <div className="panel-heading"><div><h2>Afsnit</h2><p className="muted">Afsnit og deres farvekoder</p></div>
-          <Button onClick={() => openSection()}>+ Opret afsnit</Button></div>
-        <Notice message={sections.error} /><Notice kind="success" message={sections.message} />
-        {sections.loading && !sections.data.length ? <Loading /> :
-          <DataTable columns={sectionCols} data={sections.data} searchPlaceholder="Søg efter afsnit…"
-            filters={[{ columnId: "colorHex", label: "Farve", options: colorOptions }]} />}
-      </section>
-      <section className="panel">
-        <div className="panel-heading"><div><h2>Personalegrupper</h2><p className="muted">Faglige personalegrupper</p></div>
-          <Button onClick={() => openGroup()}>+ Opret gruppe</Button></div>
-        <Notice message={groups.error} /><Notice kind="success" message={groups.message} />
-        {groups.loading && !groups.data.length ? <Loading /> :
-          <DataTable columns={groupCols} data={groups.data} searchPlaceholder="Søg efter gruppe…"
-            filters={[{ columnId: "name", label: "Personalegruppe", options: groupOptions }]} />}
-      </section>
-    </div>
+    <nav className="subnav" aria-label="Organisering">
+      <Link to="/organisering" className={!showGroups ? "selected" : ""} aria-current={!showGroups ? "page" : undefined}>Afsnit</Link>
+      <Link to="/organisering/personalegrupper" className={showGroups ? "selected" : ""} aria-current={showGroups ? "page" : undefined}>Personalegrupper</Link>
+    </nav>
+    {!showGroups ? <section className="panel">
+      <div className="panel-heading"><div><h2>Afsnit</h2><p className="muted">Afsnit og deres farvekoder</p></div>
+        <Button onClick={() => openSection()}>+ Opret afsnit</Button></div>
+      <Notice message={sections.error} /><Notice kind="success" message={sections.message} />
+      {sections.loading && !sections.data.length ? <Loading /> :
+        <DataTable columns={sectionCols} data={sections.data} searchPlaceholder="Søg efter afsnit…"
+          filters={[{ columnId: "colorHex", label: "Farve", options: colorOptions }]} />}
+    </section> : <section className="panel">
+      <div className="panel-heading"><div><h2>Personalegrupper</h2><p className="muted">Faglige personalegrupper</p></div>
+        <Button onClick={() => openGroup()}>+ Opret gruppe</Button></div>
+      <Notice message={groups.error} /><Notice kind="success" message={groups.message} />
+      {groups.loading && !groups.data.length ? <Loading /> :
+        <DataTable columns={groupCols} data={groups.data} searchPlaceholder="Søg efter gruppe…"
+          filters={[{ columnId: "name", label: "Personalegruppe", options: groupOptions }]} />}
+    </section>}
     {sections.editing && <Dialog title={sections.editing === "new" ? "Opret afsnit" : "Rediger afsnit"} onClose={sections.closeEdit}>
       <SectionForm key={sectionKey} initial={sections.editing === "new"
         ? { name: "", colorHex: "#2563EB" }

@@ -303,32 +303,58 @@ test("perioder kan filtreres efter år uafhængigt af søgning og sortering", as
   await expect(page.getByRole("row", { name: /Oktober 2026/ })).toBeVisible();
 });
 
-test("organisering har selvstændige filtre i begge paneler", async ({ page }) => {
+test("organisering viser faner og bevarer de selvstændige filtre", async ({ page }) => {
   await page.goto("/organisering");
-  const panels = page.locator(".organization-grid > section");
-  await expect(panels).toHaveCount(2);
+  const tabs = page.getByRole("navigation", { name: "Organisering" });
+  const sectionsTab = tabs.getByRole("link", { name: "Afsnit" });
+  const groupsTab = tabs.getByRole("link", { name: "Personalegrupper" });
 
-  const sections = panels.first();
-  const colorFilter = sections.getByRole("combobox", { name: "Farve" });
+  await expect(sectionsTab).toHaveAttribute("aria-current", "page");
+  await expect(groupsTab).not.toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "Afsnit" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Personalegrupper" })).toHaveCount(0);
+
+  const colorFilter = page.getByRole("combobox", { name: "Farve" });
   await colorFilter.selectOption("#2563EB");
-  await expect(sections.getByRole("row", { name: /Akutafsnit/ })).toBeVisible();
-  await expect(sections.getByRole("row", { name: /Medicinsk afsnit/ })).toHaveCount(0);
-  await sections.getByRole("searchbox", { name: "Søg" }).fill("Medicinsk");
-  await expect(sections.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
+  await expect(page.getByRole("row", { name: /Akutafsnit/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Medicinsk afsnit/ })).toHaveCount(0);
+  await page.getByRole("searchbox", { name: "Søg" }).fill("Medicinsk");
+  await expect(page.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
   await colorFilter.selectOption("#059669");
-  await expect(sections.getByRole("row", { name: /Medicinsk afsnit/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Medicinsk afsnit/ })).toBeVisible();
 
-  const groups = panels.last();
-  const groupFilter = groups.getByRole("combobox", { name: "Personalegruppe" });
+  await groupsTab.click();
+  await expect(page).toHaveURL(/\/organisering\/personalegrupper$/);
+  await expect(groupsTab).toHaveAttribute("aria-current", "page");
+  await expect(sectionsTab).not.toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "Afsnit" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Personalegrupper" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Hovednavigation" })
+    .getByRole("link", { name: "Organisering" })).toHaveClass(/active/);
+
+  const groupFilter = page.getByRole("combobox", { name: "Personalegruppe" });
   await groupFilter.selectOption({ label: "Læger" });
-  await expect(groups.getByRole("row", { name: /Læger/ })).toBeVisible();
-  await expect(groups.getByRole("row", { name: /Jordemødre/ })).toHaveCount(0);
-  await groups.getByRole("searchbox", { name: "Søg" }).fill("Jordemødre");
-  await expect(groups.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
+  await expect(page.getByRole("row", { name: /Læger/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Jordemødre/ })).toHaveCount(0);
+  await page.getByRole("searchbox", { name: "Søg" }).fill("Jordemødre");
+  await expect(page.locator("tbody tr")).toContainText(["Ingen poster fundet."]);
   await groupFilter.selectOption({ label: "Jordemødre" });
-  await expect(groups.getByRole("row", { name: /Jordemødre/ })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Jordemødre/ })).toBeVisible();
 
-  // All controls remain on the same page: no added tabs or navigation.
-  await expect(sections.getByRole("heading", { name: "Afsnit" })).toBeVisible();
-  await expect(groups.getByRole("heading", { name: "Personalegrupper" })).toBeVisible();
+  // Direct navigation must work too; both tabs are bookmarkable URLs.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Personalegrupper" })).toBeVisible();
+  await page.getByRole("button", { name: "+ Opret gruppe" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Navn på personalegruppe").fill("Fanetestgruppe");
+  await dialog.getByRole("button", { name: "Gem personalegruppe" }).click();
+  await page.getByRole("searchbox", { name: "Søg" }).fill("Fanetestgruppe");
+  await expect(page.getByRole("row", { name: /Fanetestgruppe/ })).toBeVisible();
+  await page.getByRole("row", { name: /Fanetestgruppe/ }).getByRole("button", { name: "Slet" }).click();
+  await dialog.getByRole("button", { name: "Slet", exact: true }).click();
+  await expect(page.getByRole("row", { name: /Fanetestgruppe/ })).toHaveCount(0);
+
+  await sectionsTab.click();
+  await expect(page).toHaveURL(/\/organisering$/);
+  await expect(page.getByRole("heading", { name: "Afsnit" })).toBeVisible();
 });
