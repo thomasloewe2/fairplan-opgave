@@ -4,7 +4,7 @@ export default [
   index("routes/home.tsx"),
   route("perioder", "routes/periods.tsx"),
   route("organisering", "routes/organization.tsx"),
-  route("organisering/personalegrupper", "routes/organization.tsx"),
+  route("organisering/personalegrupper", "routes/organization-groups.tsx"),
   route("adgangsstyring/brugere", "routes/users.tsx"),
   route("adgangsstyring/ansaettelser", "routes/employments.tsx"),
   route("personale", "routes/personnel.tsx"),
