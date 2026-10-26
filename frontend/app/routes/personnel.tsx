@@ -8,6 +8,7 @@ import { formatPeriod } from "../utils/display";
 
 export default function Personnel() {
   const periods = useResource(api.periods.list, []);
+  const sections = useResource(api.sections.list, []);
   const [periodId, setPeriodId] = useState("");
   useEffect(() => {
     // Preserve the current selection on reload, but fall back if that period was deleted.
@@ -22,18 +23,35 @@ export default function Personnel() {
     [periodId],
   );
   const personnel = useResource(loadPersonnel, []);
+
+  // Older local API builds may omit sectionColorHex. Use the section catalog
+  // as a fallback so the column never renders an empty color indicator.
+  const rows = useMemo(() => {
+    const colorsByName = new Map(sections.data.map(section => [section.name, section.colorHex]));
+    return personnel.data.map(row => ({
+      ...row,
+      sectionColorHex: /^#[0-9a-f]{6}$/i.test(row.sectionColorHex ?? "")
+        ? row.sectionColorHex
+        : colorsByName.get(row.sectionName) ?? "",
+    }));
+  }, [personnel.data, sections.data]);
+
   const columns = useMemo<ColumnDef<PersonnelRow>[]>(() => [
     { accessorKey: "fullName", header: "Navn" },
     { accessorKey: "sectionName", header: "Afsnit", cell: ({ row }) =>
-      <span className="color-value"><span className="color-dot" aria-hidden="true"
-        style={{ backgroundColor: row.original.sectionColorHex }} />{row.original.sectionName}</span> },
+      <span className="color-value">
+        {/^#[0-9a-f]{6}$/i.test(row.original.sectionColorHex ?? "") &&
+          <span className="color-dot" aria-hidden="true"
+            style={{ backgroundColor: row.original.sectionColorHex }} />}
+        {row.original.sectionName}
+      </span> },
     { accessorKey: "staffGroupName", header: "Personalegruppe" },
     { accessorKey: "hoursPerWeek", header: "Timer/uge",
       cell: ({ row }) => `${row.original.hoursPerWeek} timer` },
   ], []);
 
-  const sections = [...new Set(personnel.data.map(p => p.sectionName))].sort();
-  const groups = [...new Set(personnel.data.map(p => p.staffGroupName))].sort();
+  const sectionNames = [...new Set(rows.map(p => p.sectionName))].sort();
+  const groups = [...new Set(rows.map(p => p.staffGroupName))].sort();
 
   return <>
     <PageHeader title="Personale" description="Oversigt over ansættelser, der overlapper den valgte planlægningsperiode." />
@@ -47,13 +65,13 @@ export default function Personnel() {
         </label>
         <span className="readonly-label">Skrivebeskyttet oversigt</span>
       </div>
-      <Notice message={periods.error || personnel.error} />
-      {(periods.loading || personnel.loading) ? <Loading /> :
-        <DataTable data={periodId ? personnel.data : []} columns={columns}
+      <Notice message={periods.error || personnel.error || sections.error} />
+      {(periods.loading || personnel.loading || sections.loading) ? <Loading /> :
+        <DataTable data={periodId ? rows : []} columns={columns}
           searchPlaceholder="Søg efter navn, afsnit eller personalegruppe…"
           emptyText={periodId ? "Ingen ansættelser overlapper den valgte periode." : "Opret en periode for at se personale."}
           filters={[
-            { columnId: "sectionName", label: "Afsnit", options: sections.map(s => ({ value: s, label: s })) },
+            { columnId: "sectionName", label: "Afsnit", options: sectionNames.map(s => ({ value: s, label: s })) },
             { columnId: "staffGroupName", label: "Personalegruppe", options: groups.map(g => ({ value: g, label: g })) },
           ]} />}
     </section>

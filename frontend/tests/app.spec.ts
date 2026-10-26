@@ -177,7 +177,7 @@ test("ansættelser findes kun under Adgangsstyring og personale viser afsnitsfar
   await expect(nav.getByRole("link", { name: "Ansættelser" })).toHaveCount(0);
   const acuteRow = page.getByRole("row", { name: /Akutafsnit/ });
   await expect(acuteRow.locator(".color-dot")).toBeVisible();
-  await expect(acuteRow.locator(".color-dot")).toHaveAttribute("style", /background-color:/);
+  await expect(acuteRow.locator(".color-dot")).toHaveCSS("background-color", "rgb(37, 99, 235)");
   await page.getByRole("link", { name: "Adgangsstyring" }).click();
   await expect(page.getByRole("link", { name: "Ansættelser" })).toBeVisible();
 });
@@ -197,4 +197,26 @@ test("ansættelsestabellen opdaterer navnene, selv når opslagsdata hentes sener
   await page.getByRole("link", { name: "Ansættelser" }).click();
   await expect(page.getByRole("navigation", { name: "Hovednavigation" })
     .getByRole("link", { name: "Adgangsstyring" })).toHaveClass(/active/);
+});
+
+test("personale viser afsnitsfarver fra sections når API svarer uden sectionColorHex", async ({ page }) => {
+  // Reproduce an older local API build, whose personnel DTO does not contain the color.
+  await page.route("**/api/personnel?*", async route => {
+    const response = await route.fetch();
+    const rows: Record<string, unknown>[] = await response.json();
+    await route.fulfill({
+      response,
+      json: rows.map(row => {
+        const copy = { ...row };
+        delete copy.sectionColorHex;
+        return copy;
+      }),
+    });
+  });
+
+  await page.goto("/personale");
+  const acute = page.getByRole("row", { name: /Akutafsnit/ }).first().locator(".color-dot");
+  const medical = page.getByRole("row", { name: /Medicinsk afsnit/ }).first().locator(".color-dot");
+  await expect(acute).toHaveCSS("background-color", "rgb(37, 99, 235)");
+  await expect(medical).toHaveCSS("background-color", "rgb(5, 150, 105)");
 });
