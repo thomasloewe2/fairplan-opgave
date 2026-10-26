@@ -163,8 +163,8 @@ test("succesbeskeder får nedtælling, kan lukkes og forsvinder automatisk", asy
   await expect(status).toBeVisible();
   await expect(status).toHaveCount(0, { timeout: 13_000 });
 
-  for (const name of ["Toast-testperson", "Toast-testperson nummer to"]) {
-    const row = page.getByRole("row", { name: new RegExp(name) });
+  for (const name of ["Toast-testperson nummer to", "Toast-testperson"]) {
+    const row = page.getByRole("row", { name: new RegExp(`^${name} `) });
     await row.getByRole("button", { name: "Slet" }).click();
     await dialog.getByRole("button", { name: "Slet", exact: true }).click();
   }
