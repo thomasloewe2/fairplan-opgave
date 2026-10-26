@@ -19,7 +19,7 @@ function SectionForm({ initial, busy, error, cancel, save }: {
     <div className="field">
       <span>Farve</span>
       <ColorField value={value.colorHex} onChange={colorHex => setValue({ ...value, colorHex })} />
-      <small className="muted">Vælg en farve eller indtast en præcis HEX-kode.</small>
+      <small className="muted">Vælg en farve eller indtast en præcis HEX-kode, fx #000000.</small>
     </div>
     {!validColor && <Notice message="Indtast en farve på formatet #RRGGBB." />}
     <Notice message={error} />
@@ -29,13 +29,12 @@ function SectionForm({ initial, busy, error, cancel, save }: {
     </div>
   </form>;
 }
-
 function GroupForm({ initial, busy, error, cancel, save }: {
   initial: StaffGroupInput; busy: boolean; error: string | null;
   cancel: () => void; save: (value: StaffGroupInput) => Promise<void>;
 }) {
   const [value, setValue] = useState(initial);
-  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); void save(value); }}>
+  return <form onSubmit={(e: SubmitEvent<HTMLFormElement>) => { e.preventDefault(); void save(value); }}>
     <label className="field"><span>Navn på personalegruppe</span>
       <input required maxLength={100} placeholder="F.eks. Læger" value={value.name}
         onChange={e => setValue({ name: e.target.value })} />
