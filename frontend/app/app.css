@@ -468,3 +468,57 @@ h2 { color: var(--text); font-size: 1.09rem; font-weight: 650; }
 @media (prefers-reduced-motion: reduce) {
   .notice { animation: none; }
 }
+
+/* Stable dark-mode calendar: explicit month/year controls, without native picker wheel scrolling. */
+.date-field { position: relative; }
+.date-input-row { position: relative; display: flex; align-items: center; }
+.date-input-row input { padding-right: 44px; }
+.date-trigger {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+}
+.date-trigger:hover, .date-trigger[aria-expanded="true"] { color: var(--accent); background: var(--surface-hover); }
+.date-error { color: #ffb9c6; }
+.date-popover {
+  position: relative;
+  z-index: 4;
+  width: min(310px, 100%);
+  padding: 12px;
+  color: var(--text);
+  background: #1d2039;
+  border: 1px solid #45486b;
+  border-radius: 8px;
+  overscroll-behavior: contain;
+}
+.date-calendar-header { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+.date-calendar-header button, .date-calendar-footer button {
+  min-width: 30px; min-height: 32px; padding: 4px 7px; color: var(--text);
+  background: var(--surface-alt); border: 0; border-radius: 4px;
+}
+.date-calendar-header button:hover, .date-calendar-footer button:hover { background: var(--surface-hover); }
+.date-calendar-header select {
+  min-width: 0; min-height: 34px; padding: 5px 3px;
+  background: var(--input); border: 0; border-radius: 4px;
+  color: var(--text); font-size: .78rem;
+}
+.date-calendar-header select[aria-label="Måned"] { flex: 1 1 auto; }
+.date-calendar-header select[aria-label="År"] { flex: 0 0 70px; }
+.date-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.date-weekday { padding: 6px 0; text-align: center; color: var(--subtle); font-size: .74rem; }
+.date-day {
+  min-width: 0; height: 33px; color: var(--text); background: transparent;
+  border: 0; border-radius: 4px; font-size: .78rem;
+}
+.date-day:hover { background: var(--surface-hover); }
+.date-day.today { color: var(--accent); font-weight: 700; }
+.date-day.selected, .date-day.selected:hover { color: #fff; background: var(--accent-bg); }
+.date-calendar-footer { display: flex; justify-content: flex-end; padding-top: 12px; }

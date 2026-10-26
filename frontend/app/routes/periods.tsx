@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../components/DataTable";
+import { DateField } from "../components/DateField";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
 import { useCrud } from "../hooks/useCrud";
 import { api, type Period, type PeriodInput } from "../services/apiService";
@@ -17,7 +18,7 @@ function PeriodEditor({ initial, saving, error, onCancel, onSave }: {
   useEffect(() => { setValues(initial); }, [initial]);
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (values.startDate >= values.endDate) return;
+    if (!values.startDate || !values.endDate || values.startDate >= values.endDate) return;
     void onSave(values);
   }
   const datesInvalid = !!values.startDate && !!values.endDate && values.startDate >= values.endDate;
@@ -25,16 +26,14 @@ function PeriodEditor({ initial, saving, error, onCancel, onSave }: {
     <label className="field"><span>Navn</span><input required maxLength={100} value={values.name}
       onChange={e => setValues({ ...values, name: e.target.value })} placeholder="F.eks. Januar 2027" /></label>
     <div className="form-grid">
-      <label className="field"><span>Startdato</span><input required type="date" value={values.startDate}
-        onChange={e => setValues({ ...values, startDate: e.target.value })} /></label>
-      <label className="field"><span>Slutdato</span><input required type="date" value={values.endDate}
-        onChange={e => setValues({ ...values, endDate: e.target.value })} /></label>
+      <DateField label="Startdato" value={values.startDate} onChange={startDate => setValues(v => ({ ...v, startDate }))} />
+      <DateField label="Slutdato" value={values.endDate} onChange={endDate => setValues(v => ({ ...v, endDate }))} />
     </div>
     {datesInvalid && <Notice message="Slutdato skal ligge efter startdato." />}
     <Notice message={error} />
     <div className="dialog-actions">
       <Button variant="secondary" type="button" onClick={onCancel}>Annuller</Button>
-      <Button type="submit" disabled={saving || datesInvalid}>{saving ? "Gemmer…" : "Gem periode"}</Button>
+      <Button type="submit" disabled={saving || datesInvalid || !values.startDate || !values.endDate}>{saving ? "Gemmer…" : "Gem periode"}</Button>
     </div>
   </form>;
 }
@@ -61,7 +60,7 @@ export default function Periods() {
   return <>
     <PageHeader title="Perioder" description="Opret planlægningsperioder uden overlap mellem datoerne."
       actions={<Button onClick={openNew}>+ Opret periode</Button>} />
-    <Notice kind="success" message={crud.message} />
+    <Notice key={crud.messageId} kind="success" message={crud.message} />
     <Notice message={crud.error} />
     <section className="panel">
       {crud.loading && !crud.data.length ? <Loading /> : <DataTable data={crud.data} columns={columns}

@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Link } from "react-router";
 import { DataTable } from "../components/DataTable";
+import { DateField } from "../components/DateField";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
 import { useCrud } from "../hooks/useCrud";
 import { useResource } from "../hooks/useResource";
@@ -18,7 +19,7 @@ function EmploymentForm({ initial, busy, error, cancel, save, users, sections, g
   const [value, setValue] = useState<EmploymentInput>(initial);
   const datesInvalid = !!value.startDate && !!value.endDate && value.startDate >= value.endDate;
   const hasOptions = users.some(u => u.isPersonnel) && sections.length > 0 && groups.length > 0;
-  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); if (!datesInvalid) void save(value); }}>
+  return <form onSubmit={(e: FormEvent<HTMLFormElement>) => { e.preventDefault(); if (!datesInvalid && value.startDate && value.endDate) void save(value); }}>
     {!hasOptions && <Notice kind="info" message="Opret først en bruger med Personale-rollen, et afsnit og en personalegruppe." />}
     <label className="field"><span>Bruger</span>
       <select required value={value.userId} onChange={e => setValue({ ...value, userId: e.target.value })}>
@@ -45,20 +46,14 @@ function EmploymentForm({ initial, busy, error, cancel, save, users, sections, g
         onChange={e => setValue({ ...value, hoursPerWeek: Number(e.target.value) })} />
     </label>
     <div className="form-grid">
-      <label className="field"><span>Startdato</span>
-        <input type="date" required value={value.startDate}
-          onChange={e => setValue({ ...value, startDate: e.target.value })} />
-      </label>
-      <label className="field"><span>Slutdato</span>
-        <input type="date" required value={value.endDate}
-          onChange={e => setValue({ ...value, endDate: e.target.value })} />
-      </label>
+      <DateField label="Startdato" value={value.startDate} onChange={startDate => setValue(v => ({ ...v, startDate }))} />
+      <DateField label="Slutdato" value={value.endDate} onChange={endDate => setValue(v => ({ ...v, endDate }))} />
     </div>
     {datesInvalid && <Notice message="Slutdato skal ligge efter startdato." />}
     <Notice message={error} />
     <div className="dialog-actions">
       <Button type="button" variant="secondary" onClick={cancel}>Annuller</Button>
-      <Button type="submit" disabled={busy || datesInvalid || !hasOptions}>{busy ? "Gemmer…" : "Gem ansættelse"}</Button>
+      <Button type="submit" disabled={busy || datesInvalid || !hasOptions || !value.startDate || !value.endDate}>{busy ? "Gemmer…" : "Gem ansættelse"}</Button>
     </div>
   </form>;
 }
@@ -100,7 +95,7 @@ export default function Employments() {
       <Link to="/adgangsstyring/brugere">Brugere</Link>
       <Link to="/adgangsstyring/ansaettelser" className="selected">Ansættelser</Link>
     </div>
-    <Notice message={crud.error || referenceError} /><Notice kind="success" message={crud.message} />
+    <Notice message={crud.error || referenceError} /><Notice key={crud.messageId} kind="success" message={crud.message} />
     <section className="panel">
       {(crud.loading || busyReferences) && !crud.data.length ? <Loading /> :
         <DataTable data={crud.data} columns={columns} searchPlaceholder="Søg efter bruger, afsnit eller gruppe…"
