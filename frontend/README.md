@@ -35,6 +35,8 @@ npm run build
 - Adgangsstyring: Brugere og ansættelser med formularvalidering
 - Personale: Skrivebeskyttet oversigt for en valgt periode
 - Genbrugelige tabeller med søgning, filtrering, sortering og paginering
+- Start- og slutdatoer vælges i en mørk kalender med måned- og årsvælger eller indtastes som `dd.mm.åååå`
+- Statusbeskeder har nedtælling, luk-knap og forsvinder efter 10 sekunder
 - Backendvalideringsfejl vises i formularerne
 
 Login er uden for denne hjemmeopgaves scope.
