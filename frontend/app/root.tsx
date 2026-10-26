@@ -1,5 +1,6 @@
 import { NavLink, Outlet, isRouteErrorResponse, Links, Meta, Scripts, ScrollRestoration } from "react-router";
 import type { Route } from "./+types/root";
+import { AppIcon, type AppIconName } from "./components/AppIcon";
 import "./app.css";
 
 export const meta: Route.MetaFunction = () => [
@@ -14,13 +15,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   </html>;
 }
 
-const menu = [
-  { to: "/", label: "Overblik", end: true },
-  { to: "/perioder", label: "Perioder" },
-  { to: "/organisering", label: "Organisering" },
-  { to: "/adgangsstyring/brugere", label: "Adgange" },
-  { to: "/adgangsstyring/ansaettelser", label: "Ansættelser" },
-  { to: "/personale", label: "Personale" },
+const menu: { to: string; label: string; icon: AppIconName; end?: boolean }[] = [
+  { to: "/", label: "Overblik", icon: "dashboard", end: true },
+  { to: "/perioder", label: "Perioder", icon: "calendar" },
+  { to: "/organisering", label: "Organisering", icon: "building" },
+  { to: "/adgangsstyring/brugere", label: "Adgange", icon: "shield" },
+  { to: "/adgangsstyring/ansaettelser", label: "Ansættelser", icon: "briefcase" },
+  { to: "/personale", label: "Personale", icon: "users" },
 ];
 
 export default function App() {
@@ -32,7 +33,7 @@ export default function App() {
       <div className="nav-label">NAVIGATION</div>
       <nav className="sidebar-nav" aria-label="Hovednavigation">
         {menu.map((entry) => <NavLink key={entry.to} to={entry.to} end={entry.end}
-          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}>{entry.label}</NavLink>)}
+          className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
       </nav>
       <div className="sidebar-footer">FairPlan · Administrationsportal</div>
     </aside>
