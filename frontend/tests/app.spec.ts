@@ -8,8 +8,8 @@ test("perioder kan oprettes, redigeres, søges og slettes", async ({ page }) => 
   await page.getByRole("button", { name: "+ Opret periode" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Navn").fill("UI-testperiode");
-  await dialog.getByRole("textbox", { name: "Startdato" }).fill("2028-01-01");
-  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("2028-01-31");
+  await dialog.getByLabel("Startdato").fill("2028-01-01");
+  await dialog.getByLabel("Slutdato").fill("2028-01-31");
   await dialog.getByRole("button", { name: "Gem periode" }).click();
 
   let row = page.getByRole("row", { name: /UI-testperiode/ });
@@ -69,8 +69,8 @@ test("bruger med ansættelse kan ikke slettes før ansættelsen", async ({ page 
   await dialog.getByLabel("Bruger").selectOption({ label: "UI-testperson (ui-person@example.test)" });
   await dialog.getByLabel("Afsnit").selectOption({ label: "Akutafsnit" });
   await dialog.getByLabel("Personalegruppe").selectOption({ label: "Læger" });
-  await dialog.getByRole("textbox", { name: "Startdato" }).fill("2029-01-01");
-  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("2029-06-30");
+  await dialog.getByLabel("Startdato").fill("2029-01-01");
+  await dialog.getByLabel("Slutdato").fill("2029-06-30");
   await dialog.getByRole("button", { name: "Gem ansættelse" }).click();
   let employment = page.getByRole("row", { name: /UI-testperson/ });
   await expect(employment).toBeVisible();
@@ -110,28 +110,27 @@ test("personaleoversigten filtrerer på periode, navn og afsnit", async ({ page 
   await expect(page.getByRole("row", { name: /Anna Jensen/ })).toHaveCount(0);
 });
 
-test("datovælgeren fastholder måned og år og understøtter danske datoer", async ({ page }) => {
+test("den indbyggede datovælger bruger dark theme uden at flytte formularens indhold", async ({ page }) => {
   await page.goto("/perioder");
   await page.getByRole("button", { name: "+ Opret periode" }).click();
   const dialog = page.getByRole("dialog");
+  const start = dialog.getByLabel("Startdato");
+  const end = dialog.getByLabel("Slutdato");
+  await expect(start).toHaveAttribute("type", "date");
+  await expect(end).toHaveAttribute("type", "date");
+  await expect(start).toHaveCSS("color-scheme", "dark");
+  await expect(end).toHaveCSS("color-scheme", "dark");
+
+  const initialHeight = await dialog.evaluate(element => element.getBoundingClientRect().height);
+  await start.click();
+  const activeHeight = await dialog.evaluate(element => element.getBoundingClientRect().height);
+  expect(activeHeight).toBe(initialHeight);
+
   await dialog.getByLabel("Navn").fill("Kalender-testperiode");
-
-  await dialog.getByRole("button", { name: "Åbn kalender for Startdato" }).click();
-  const startCalendar = dialog.getByRole("group", { name: "Kalender for Startdato" });
-  await expect(startCalendar).toBeVisible();
-  await startCalendar.getByRole("combobox", { name: "År" }).selectOption("2030");
-  await startCalendar.getByRole("combobox", { name: "Måned" }).selectOption("0");
-  await startCalendar.hover();
-  await page.mouse.wheel(0, 450);
-  await expect(startCalendar.getByRole("combobox", { name: "År" })).toHaveValue("2030");
-  await expect(startCalendar.getByRole("combobox", { name: "Måned" })).toHaveValue("0");
-  await startCalendar.getByRole("button", { name: "Vælg 15.01.2030" }).click();
-  await expect(dialog.getByRole("textbox", { name: "Startdato" })).toHaveValue("15.01.2030");
-
-  await dialog.getByRole("textbox", { name: "Slutdato" }).fill("31.01.2030");
+  await start.fill("2030-01-15");
+  await end.fill("2030-01-31");
   await dialog.getByRole("button", { name: "Gem periode" }).click();
   const row = page.getByRole("row", { name: /Kalender-testperiode/ });
-  await expect(row).toBeVisible();
   await expect(row).toContainText("15.01.2030");
   await expect(row).toContainText("31.01.2030");
 
@@ -219,4 +218,15 @@ test("personale viser afsnitsfarver fra sections når API svarer uden sectionCol
   const medical = page.getByRole("row", { name: /Medicinsk afsnit/ }).first().locator(".color-dot");
   await expect(acute).toHaveCSS("background-color", "rgb(37, 99, 235)");
   await expect(medical).toHaveCSS("background-color", "rgb(5, 150, 105)");
+});
+
+test("ansættelsesformularens indbyggede datofelter har mørkt tema", async ({ page }) => {
+  await page.goto("/adgangsstyring/ansaettelser");
+  await page.getByRole("button", { name: "+ Opret ansættelse" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Startdato")).toHaveAttribute("type", "date");
+  await expect(dialog.getByLabel("Slutdato")).toHaveAttribute("type", "date");
+  await expect(dialog.getByLabel("Startdato")).toHaveCSS("color-scheme", "dark");
+  await expect(dialog.getByLabel("Slutdato")).toHaveCSS("color-scheme", "dark");
+  await dialog.getByRole("button", { name: "Annuller" }).click();
 });

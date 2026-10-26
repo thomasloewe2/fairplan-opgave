@@ -6,7 +6,7 @@ Til tabellerne bruger jeg TanStack Table. Det giver søgning, sortering, filtrer
 
 Til afsnitsfarver har jeg valgt browserens indbyggede `input type="color"` sammen med et tekstfelt til HEX. Det undgår en ekstra afhængighed, men lader brugeren både vælge farven visuelt og indtaste den præcist.
 
-Til datoer bruger jeg en enkel kalenderkomponent med faste måned- og årsvælgere. Browserens indbyggede datovælger kunne ikke styles konsekvent og havde uhensigtsmæssig scrolling. Brugeren kan også indtaste datoer i dansk format.
+Til datoer bruger jeg browserens indbyggede `input type="date"` med `color-scheme: dark`. Jeg havde først forsøgt en specialbygget kalender, men den skubbede til formularens øvrige indhold. Browserens eget overlay giver et enklere flow uden den forskydning; udseende og scrolling varierer dog lidt med browser og styres ikke fuldt ud af CSS.
 
 Formularer laver enkel klientvalidering for hurtig feedback. Backend forbliver ansvarlig for forretningsreglerne, og dens valideringsbeskeder vises i grænsefladen.
 

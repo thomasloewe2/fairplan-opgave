@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../components/DataTable";
-import { DateField } from "../components/DateField";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
 import { useCrud } from "../hooks/useCrud";
 import { api, type Period, type PeriodInput } from "../services/apiService";
@@ -26,8 +25,14 @@ function PeriodEditor({ initial, saving, error, onCancel, onSave }: {
     <label className="field"><span>Navn</span><input required maxLength={100} value={values.name}
       onChange={e => setValues({ ...values, name: e.target.value })} placeholder="F.eks. Januar 2027" /></label>
     <div className="form-grid">
-      <DateField label="Startdato" value={values.startDate} onChange={startDate => setValues(v => ({ ...v, startDate }))} />
-      <DateField label="Slutdato" value={values.endDate} onChange={endDate => setValues(v => ({ ...v, endDate }))} />
+      <label className="field"><span>Startdato</span>
+        <input type="date" required value={values.startDate}
+          onChange={e => setValues(v => ({ ...v, startDate: e.target.value }))} />
+      </label>
+      <label className="field"><span>Slutdato</span>
+        <input type="date" required value={values.endDate}
+          onChange={e => setValues(v => ({ ...v, endDate: e.target.value }))} />
+      </label>
     </div>
     {datesInvalid && <Notice message="Slutdato skal ligge efter startdato." />}
     <Notice message={error} />

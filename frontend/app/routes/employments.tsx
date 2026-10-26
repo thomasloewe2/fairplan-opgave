@@ -2,7 +2,6 @@ import { useMemo, useState, type FormEvent } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Link } from "react-router";
 import { DataTable } from "../components/DataTable";
-import { DateField } from "../components/DateField";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
 import { useCrud } from "../hooks/useCrud";
 import { useResource } from "../hooks/useResource";
@@ -46,8 +45,14 @@ function EmploymentForm({ initial, busy, error, cancel, save, users, sections, g
         onChange={e => setValue({ ...value, hoursPerWeek: Number(e.target.value) })} />
     </label>
     <div className="form-grid">
-      <DateField label="Startdato" value={value.startDate} onChange={startDate => setValue(v => ({ ...v, startDate }))} />
-      <DateField label="Slutdato" value={value.endDate} onChange={endDate => setValue(v => ({ ...v, endDate }))} />
+      <label className="field"><span>Startdato</span>
+        <input type="date" required value={value.startDate}
+          onChange={e => setValue(v => ({ ...v, startDate: e.target.value }))} />
+      </label>
+      <label className="field"><span>Slutdato</span>
+        <input type="date" required value={value.endDate}
+          onChange={e => setValue(v => ({ ...v, endDate: e.target.value }))} />
+      </label>
     </div>
     {datesInvalid && <Notice message="Slutdato skal ligge efter startdato." />}
     <Notice message={error} />

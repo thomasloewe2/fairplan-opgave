@@ -35,7 +35,7 @@ npm run build
 - Adgangsstyring: Brugere og ansættelser med formularvalidering
 - Personale: Skrivebeskyttet oversigt for en valgt periode
 - Genbrugelige tabeller med søgning, filtrering, sortering og paginering
-- Start- og slutdatoer vælges i en mørk kalender med måned- og årsvælger eller indtastes som `dd.mm.åååå`
+- Start- og slutdatoer bruger browserens indbyggede datovælger (mørkt tema, hvor browseren understøtter det); kalenderen åbner uden at flytte indholdet
 - Statusbeskeder har nedtælling, luk-knap og forsvinder efter 10 sekunder
 - Backendvalideringsfejl vises i formularerne
 
