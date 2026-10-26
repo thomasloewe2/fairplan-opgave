@@ -163,8 +163,9 @@ test("succesbeskeder får nedtælling, kan lukkes og forsvinder automatisk", asy
   await expect(status).toBeVisible();
   await expect(status).toHaveCount(0, { timeout: 13_000 });
 
-  for (const name of ["Toast-testperson nummer to", "Toast-testperson"]) {
-    const row = page.getByRole("row", { name: new RegExp(`^${name} `) });
+  // E-mail is unique, unlike a person's display name.
+  for (const email of ["toast-person-two@example.test", "toast-person@example.test"]) {
+    const row = page.getByRole("row", { name: new RegExp(email.replace(".", "\\.")) });
     await row.getByRole("button", { name: "Slet" }).click();
     await dialog.getByRole("button", { name: "Slet", exact: true }).click();
   }
