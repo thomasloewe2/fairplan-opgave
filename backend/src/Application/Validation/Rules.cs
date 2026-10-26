@@ -10,7 +10,7 @@ public static partial class Rules
     {
         var value = name?.Trim();
         if (string.IsNullOrWhiteSpace(value) || value.Length > 100)
-            throw ApplicationException.Invalid($"{label} skal indeholde mellem 1 og 100 tegn.");
+            throw BusinessException.Invalid($"{label} skal indeholde mellem 1 og 100 tegn.");
         return value;
     }
 
@@ -18,7 +18,7 @@ public static partial class Rules
     {
         var value = hex?.Trim();
         if (value is null || !HexColorRegex().IsMatch(value))
-            throw ApplicationException.Invalid("Farvekoden skal være en HEX-farve, f.eks. #3B82F6.");
+            throw BusinessException.Invalid("Farvekoden skal være en HEX-farve, f.eks. #3B82F6.");
         return value.ToUpperInvariant();
     }
 
@@ -29,26 +29,26 @@ public static partial class Rules
             !MailAddress.TryCreate(value, out var address) ||
             !string.Equals(address.Address, value, StringComparison.OrdinalIgnoreCase) ||
             !value.Contains('.'))
-            throw ApplicationException.Invalid("Angiv en gyldig e-mailadresse.");
+            throw BusinessException.Invalid("Angiv en gyldig e-mailadresse.");
         return value;
     }
 
     public static void DateInterval(DateOnly start, DateOnly end)
     {
         if (start == default || end == default || start >= end)
-            throw ApplicationException.Invalid("Startdato skal ligge før slutdato.");
+            throw BusinessException.Invalid("Startdato skal ligge før slutdato.");
     }
 
     public static void Hours(int hours)
     {
         if (hours is < 0 or > 37)
-            throw ApplicationException.Invalid("Timer pr. uge skal være mellem 0 og 37.");
+            throw BusinessException.Invalid("Timer pr. uge skal være mellem 0 og 37.");
     }
 
     public static void UserRoles(bool isAdmin, bool isPersonnel)
     {
         if (!isAdmin && !isPersonnel)
-            throw ApplicationException.Invalid("Brugeren skal have mindst én rolle.");
+            throw BusinessException.Invalid("Brugeren skal have mindst én rolle.");
     }
 
     [GeneratedRegex("^#[0-9A-Fa-f]{6}$", RegexOptions.CultureInvariant)]

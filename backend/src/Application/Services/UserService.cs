@@ -22,7 +22,7 @@ public sealed class UserService(IUserRepository repository)
         Rules.UserRoles(request.IsAdmin, request.IsPersonnel);
         var normalized = email.ToUpperInvariant();
         if (await repository.EmailExistsAsync(normalized, cancellationToken: ct))
-            throw ApplicationException.Conflict("E-mailadressen er allerede i brug.");
+            throw BusinessException.Conflict("E-mailadressen er allerede i brug.");
 
         var user = new User
         {
@@ -49,9 +49,9 @@ public sealed class UserService(IUserRepository repository)
         var normalized = email.ToUpperInvariant();
 
         if (await repository.EmailExistsAsync(normalized, excludeId: id, cancellationToken: ct))
-            throw ApplicationException.Conflict("E-mailadressen er allerede i brug.");
+            throw BusinessException.Conflict("E-mailadressen er allerede i brug.");
         if (user.IsPersonnel && !request.IsPersonnel && await repository.HasEmploymentsAsync(id, ct))
-            throw ApplicationException.Conflict("Personale-rollen kan ikke fjernes fra en bruger med ansættelser.");
+            throw BusinessException.Conflict("Personale-rollen kan ikke fjernes fra en bruger med ansættelser.");
 
         user.FullName = name;
         user.Email = email;
@@ -68,10 +68,10 @@ public sealed class UserService(IUserRepository repository)
     {
         var user = await FindAsync(id, ct);
         if (await repository.HasEmploymentsAsync(id, ct))
-            throw ApplicationException.Conflict("Brugeren kan ikke slettes, da vedkommende har ansættelser.");
+            throw BusinessException.Conflict("Brugeren kan ikke slettes, da vedkommende har ansættelser.");
         await repository.DeleteAsync(user, ct);
     }
 
     private async Task<User> FindAsync(Guid id, CancellationToken ct) =>
-        await repository.GetByIdAsync(id, ct) ?? throw ApplicationException.Missing("Brugeren blev ikke fundet.");
+        await repository.GetByIdAsync(id, ct) ?? throw BusinessException.Missing("Brugeren blev ikke fundet.");
 }

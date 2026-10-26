@@ -10,7 +10,7 @@ public sealed class PersonnelService(IPeriodRepository periods, IEmploymentRepos
     public async Task<IReadOnlyList<PersonnelResponse>> GetForPeriodAsync(Guid periodId, CancellationToken ct = default)
     {
         var period = await periods.GetByIdAsync(periodId, ct)
-            ?? throw ApplicationException.Missing("Perioden blev ikke fundet.");
+            ?? throw BusinessException.Missing("Perioden blev ikke fundet.");
 
         var matches = await employments.GetForPeriodAsync(period.StartDate, period.EndDate, ct);
         return matches.Select(x => x.ToPersonnelResponse())

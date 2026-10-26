@@ -35,10 +35,10 @@ public sealed class SectionService(ISectionRepository repository)
     {
         var section = await FindAsync(id, ct);
         if (await repository.HasEmploymentsAsync(id, ct))
-            throw ApplicationException.Conflict("Afsnittet kan ikke slettes, da det har tilknyttede ansættelser.");
+            throw BusinessException.Conflict("Afsnittet kan ikke slettes, da det har tilknyttede ansættelser.");
         await repository.DeleteAsync(section, ct);
     }
 
     private async Task<Section> FindAsync(Guid id, CancellationToken ct) =>
-        await repository.GetByIdAsync(id, ct) ?? throw ApplicationException.Missing("Afsnittet blev ikke fundet.");
+        await repository.GetByIdAsync(id, ct) ?? throw BusinessException.Missing("Afsnittet blev ikke fundet.");
 }

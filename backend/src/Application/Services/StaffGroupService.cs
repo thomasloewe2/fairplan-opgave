@@ -34,10 +34,10 @@ public sealed class StaffGroupService(IStaffGroupRepository repository)
     {
         var group = await FindAsync(id, ct);
         if (await repository.HasEmploymentsAsync(id, ct))
-            throw ApplicationException.Conflict("Personalegruppen kan ikke slettes, da den har tilknyttede ansættelser.");
+            throw BusinessException.Conflict("Personalegruppen kan ikke slettes, da den har tilknyttede ansættelser.");
         await repository.DeleteAsync(group, ct);
     }
 
     private async Task<StaffGroup> FindAsync(Guid id, CancellationToken ct) =>
-        await repository.GetByIdAsync(id, ct) ?? throw ApplicationException.Missing("Personalegruppen blev ikke fundet.");
+        await repository.GetByIdAsync(id, ct) ?? throw BusinessException.Missing("Personalegruppen blev ikke fundet.");
 }

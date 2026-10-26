@@ -61,20 +61,20 @@ public sealed class EmploymentService(
         Rules.DateInterval(start, end);
         Rules.Hours(hours);
         if (userId == Guid.Empty || sectionId == Guid.Empty || groupId == Guid.Empty)
-            throw ApplicationException.Invalid("Bruger, afsnit og personalegruppe skal vælges.");
+            throw BusinessException.Invalid("Bruger, afsnit og personalegruppe skal vælges.");
 
         var user = await users.GetByIdAsync(userId, ct)
-            ?? throw ApplicationException.Invalid("Den valgte bruger findes ikke.");
+            ?? throw BusinessException.Invalid("Den valgte bruger findes ikke.");
         if (!user.IsPersonnel)
-            throw ApplicationException.Invalid("Brugeren skal have rollen Personale.");
+            throw BusinessException.Invalid("Brugeren skal have rollen Personale.");
         if (await sections.GetByIdAsync(sectionId, ct) is null)
-            throw ApplicationException.Invalid("Det valgte afsnit findes ikke.");
+            throw BusinessException.Invalid("Det valgte afsnit findes ikke.");
         if (await groups.GetByIdAsync(groupId, ct) is null)
-            throw ApplicationException.Invalid("Den valgte personalegruppe findes ikke.");
+            throw BusinessException.Invalid("Den valgte personalegruppe findes ikke.");
         if (await repository.HasOverlapForUserAsync(userId, start, end, excludeId, ct))
-            throw ApplicationException.Conflict("Brugeren har allerede en ansættelse i den valgte periode.");
+            throw BusinessException.Conflict("Brugeren har allerede en ansættelse i den valgte periode.");
     }
 
     private async Task<Employment> FindAsync(Guid id, CancellationToken ct) =>
-        await repository.GetByIdAsync(id, ct) ?? throw ApplicationException.Missing("Ansættelsen blev ikke fundet.");
+        await repository.GetByIdAsync(id, ct) ?? throw BusinessException.Missing("Ansættelsen blev ikke fundet.");
 }

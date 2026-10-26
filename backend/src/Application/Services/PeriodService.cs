@@ -20,7 +20,7 @@ public sealed class PeriodService(IPeriodRepository repository)
         Rules.DateInterval(request.StartDate, request.EndDate);
         var name = Rules.Name(request.Name, "Periodens navn");
         if (await repository.HasOverlapAsync(request.StartDate, request.EndDate, cancellationToken: ct))
-            throw ApplicationException.Conflict("Perioden overlapper en eksisterende periode.");
+            throw BusinessException.Conflict("Perioden overlapper en eksisterende periode.");
 
         var period = new Period { Name = name, StartDate = request.StartDate, EndDate = request.EndDate };
         await repository.AddAsync(period, ct);
@@ -33,7 +33,7 @@ public sealed class PeriodService(IPeriodRepository repository)
         Rules.DateInterval(request.StartDate, request.EndDate);
         var name = Rules.Name(request.Name, "Periodens navn");
         if (await repository.HasOverlapAsync(request.StartDate, request.EndDate, excludeId: id, cancellationToken: ct))
-            throw ApplicationException.Conflict("Perioden overlapper en eksisterende periode.");
+            throw BusinessException.Conflict("Perioden overlapper en eksisterende periode.");
 
         period.Name = name;
         period.StartDate = request.StartDate;
@@ -46,5 +46,5 @@ public sealed class PeriodService(IPeriodRepository repository)
         await repository.DeleteAsync(await FindAsync(id, ct), ct);
 
     private async Task<Period> FindAsync(Guid id, CancellationToken ct) =>
-        await repository.GetByIdAsync(id, ct) ?? throw ApplicationException.Missing("Perioden blev ikke fundet.");
+        await repository.GetByIdAsync(id, ct) ?? throw BusinessException.Missing("Perioden blev ikke fundet.");
 }
