@@ -28,19 +28,18 @@ export default function App() {
   return <div className="app-shell">
     <aside className="sidebar">
       <NavLink to="/" className="brand" aria-label="FairPlan – Forside">
-        <span>FairPlan<small>Administration</small></span>
+        <span>FairPlan</span>
       </NavLink>
       <div className="nav-label">NAVIGATION</div>
       <nav className="sidebar-nav" aria-label="Hovednavigation">
         {menu.map((entry) => <NavLink key={entry.to} to={entry.to} end={entry.end}
           className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}><AppIcon name={entry.icon} size={18} className="nav-icon" /><span>{entry.label}</span></NavLink>)}
       </nav>
-      <div className="sidebar-footer">FairPlan · Administrationsportal</div>
+      <div className="sidebar-footer">FairPlan · Vagtplanlægning</div>
     </aside>
     <div className="app-main">
       <header className="topbar">
-        <span className="topbar-label">Planlægning og organisering</span>
-        <span className="topbar-context">Administrationsportal</span>
+        <span className="topbar-label">Vagtplanlægning</span>
       </header>
       <main className="main-content"><Outlet /></main>
     </div>
