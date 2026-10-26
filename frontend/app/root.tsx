@@ -27,7 +27,6 @@ export default function App() {
   return <div className="app-shell">
     <aside className="sidebar">
       <NavLink to="/" className="brand" aria-label="FairPlan – Forside">
-        <span className="brand-mark" aria-hidden="true">F</span>
         <span>FairPlan<small>Administration</small></span>
       </NavLink>
       <div className="nav-label">NAVIGATION</div>
@@ -40,7 +39,7 @@ export default function App() {
     <div className="app-main">
       <header className="topbar">
         <span className="topbar-label">Planlægning og organisering</span>
-        <span className="topbar-status"><i /> Administration</span>
+        <span className="topbar-context">Administrationsportal</span>
       </header>
       <main className="main-content"><Outlet /></main>
     </div>

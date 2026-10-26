@@ -25,7 +25,6 @@ export default function Home() {
     </div>
     <div className="home-panels">
       <section className="panel intro-panel">
-        <div className="eyebrow">KOM GODT I GANG</div>
         <h2>Administrér vagtplansgrundlaget</h2>
         <p>Opret perioder, organisér afsnit og personalegrupper, og knyt brugere til ansættelser. Personaleoversigten viser ansættelser for den valgte planlægningsperiode.</p>
         <Link className="btn btn-primary" to="/personale">Åbn personaleoversigt →</Link>

@@ -1,6 +1,6 @@
 # FairPlan – frontend
 
-React 19, TypeScript, React Router 7 (SPA), TanStack Table og Tailwind CSS.
+React 19, TypeScript, React Router 7 (SPA), TanStack Table og Tailwind CSS. Grænsefladen anvender et ensartet mørkt tema uden dekorative gradients og box-shadows.
 
 ## Start lokalt
 
@@ -13,10 +13,10 @@ npm run dev
 
 Åbn `http://localhost:5173`.
 
-API-adressen kan tilsidesættes med `VITE_API_BASE_URL` i `frontend/.env.local`:
+API-adressen kan tilsidesættes med `VITE_API_BASE_URL` i `frontend/.env.local`. Ved brug af backendens HTTPS-launchprofil (`https://localhost:7170`) angives:
 
 ```text
-VITE_API_BASE_URL=http://localhost:5166
+VITE_API_BASE_URL=https://localhost:7170
 ```
 
 Brug en adresse, der er tilgængelig fra browseren. Den eksisterende backend tillader `http://localhost:5173` via CORS.
