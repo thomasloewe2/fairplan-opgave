@@ -58,6 +58,8 @@ function EmploymentForm({ initial, busy, error, cancel, save, users, sections, g
   </form>;
 }
 
+type EmploymentTableRow = Employment & { userName: string; sectionName: string; groupName: string };
+
 export default function Employments() {
   const crud = useCrud(api.employments);
   const users = useResource(api.users.list, []);
@@ -68,14 +70,23 @@ export default function Employments() {
   const sectionName = (id: string) => sections.data.find(s => s.id === id)?.name ?? "Ukendt afsnit";
   const groupName = (id: string) => groups.data.find(g => g.id === id)?.name ?? "Ukendt gruppe";
 
+  // Resolve related labels into table data. TanStack caches accessor values per row;
+  // accessor functions closing over initially-empty lookups would otherwise stay "Ukendt".
+  const rows = useMemo<EmploymentTableRow[]>(() => crud.data.map(employment => ({
+    ...employment,
+    userName: users.data.find(user => user.id === employment.userId)?.fullName ?? "Ukendt bruger",
+    sectionName: sections.data.find(section => section.id === employment.sectionId)?.name ?? "Ukendt afsnit",
+    groupName: groups.data.find(group => group.id === employment.staffGroupId)?.name ?? "Ukendt gruppe",
+  })), [crud.data, users.data, sections.data, groups.data]);
+
   const open = (row?: Employment) => {
     setFormKey(k => k + 1);
     if (row) crud.edit(row); else crud.create();
   };
-  const columns = useMemo<ColumnDef<Employment>[]>(() => [
-    { id: "user", accessorFn: row => userName(row.userId), header: "Bruger" },
-    { id: "section", accessorFn: row => sectionName(row.sectionId), header: "Afsnit" },
-    { id: "group", accessorFn: row => groupName(row.staffGroupId), header: "Personalegruppe" },
+  const columns = useMemo<ColumnDef<EmploymentTableRow>[]>(() => [
+    { id: "user", accessorKey: "userName", header: "Bruger" },
+    { id: "section", accessorKey: "sectionName", header: "Afsnit" },
+    { id: "group", accessorKey: "groupName", header: "Personalegruppe" },
     { accessorKey: "hoursPerWeek", header: "Timer/uge", cell: ({ row }) => `${row.original.hoursPerWeek} timer` },
     { accessorKey: "startDate", header: "Startdato", cell: ({ row }) => formatDate(row.original.startDate) },
     { accessorKey: "endDate", header: "Slutdato", cell: ({ row }) => formatDate(row.original.endDate) },
@@ -84,7 +95,7 @@ export default function Employments() {
         <button type="button" onClick={() => open(row.original)}>Rediger</button>
         <button type="button" className="danger-link" onClick={() => crud.askDelete(row.original)}>Slet</button>
       </div> },
-  ], [users.data, sections.data, groups.data]);
+  ], []);
 
   const busyReferences = users.loading || sections.loading || groups.loading;
   const referenceError = users.error || sections.error || groups.error;
@@ -97,8 +108,8 @@ export default function Employments() {
     </div>
     <Notice message={crud.error || referenceError} /><Notice key={crud.messageId} kind="success" message={crud.message} />
     <section className="panel">
-      {(crud.loading || busyReferences) && !crud.data.length ? <Loading /> :
-        <DataTable data={crud.data} columns={columns} searchPlaceholder="Søg efter bruger, afsnit eller gruppe…"
+      {(crud.loading || busyReferences) ? <Loading /> :
+        <DataTable data={rows} columns={columns} searchPlaceholder="Søg efter bruger, afsnit eller gruppe…"
           filters={[
             { columnId: "section", label: "Afsnit", options: sections.data.map(s => ({ value: s.name, label: s.name })) },
             { columnId: "group", label: "Personalegruppe", options: groups.data.map(g => ({ value: g.name, label: g.name })) },
