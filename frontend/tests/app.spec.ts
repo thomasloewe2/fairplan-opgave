@@ -36,7 +36,7 @@ test("organisering understøtter farvevalg, præcis HEX-kode og beskyttet sletni
   await expect(dialog.getByLabel("Vælg farve")).toHaveValue("#aabbcc");
   await dialog.getByRole("button", { name: "Gem afsnit" }).click();
 
-  await page.getByRole("searchbox", { name: "Søg" }).fill("UI-testafsnit");
+  await page.getByRole("searchbox", { name: "Søg" }).first().fill("UI-testafsnit");
   let row = page.getByRole("row", { name: /UI-testafsnit/ });
   await expect(row).toBeVisible();
   await row.getByRole("button", { name: "Rediger" }).click();
@@ -49,7 +49,7 @@ test("organisering understøtter farvevalg, præcis HEX-kode og beskyttet sletni
   await dialog.getByRole("button", { name: "Slet", exact: true }).click();
   await expect(row).toHaveCount(0);
 
-  await page.getByRole("searchbox", { name: "Søg" }).fill("Akutafsnit");
+  await page.getByRole("searchbox", { name: "Søg" }).first().fill("Akutafsnit");
   const seededRow = page.getByRole("row", { name: /Akutafsnit/ });
   await seededRow.getByRole("button", { name: "Slet" }).click();
   await dialog.getByRole("button", { name: "Slet", exact: true }).click();
@@ -248,4 +248,31 @@ test("ansættelsesformularens indbyggede datofelter har mørkt tema", async ({ p
   await expect(dialog.getByLabel("Startdato")).toHaveCSS("color-scheme", "dark");
   await expect(dialog.getByLabel("Slutdato")).toHaveCSS("color-scheme", "dark");
   await dialog.getByRole("button", { name: "Annuller" }).click();
+});
+
+test("seed giver seks hele kalendermåneder og et bredt udsnit af sygehuspersonale", async ({ page, request }) => {
+  const response = await request.get("http://localhost:5166/api/periods");
+  expect(response.ok()).toBeTruthy();
+  const periods: { name: string; startDate: string; endDate: string }[] = await response.json();
+  expect(periods.map(p => p.name)).toEqual([
+    "Oktober 2026", "November 2026", "December 2026",
+    "Januar 2027", "Februar 2027", "Marts 2027",
+  ]);
+  for (const period of periods) {
+    expect(period.startDate.slice(8)).toBe("01");
+    const year = Number(period.startDate.slice(0, 4));
+    const month = Number(period.startDate.slice(5, 7));
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    expect(Number(period.endDate.slice(8))).toBe(lastDay);
+  }
+
+  await page.goto("/organisering");
+  await page.getByRole("searchbox", { name: "Søg" }).first().fill("Fødegang");
+  await expect(page.getByRole("row", { name: /Fødegang/ })).toBeVisible();
+
+  await page.goto("/personale");
+  await page.getByLabel("Vælg planlægningsperiode")
+    .selectOption("40000000-0000-0000-0000-000000000004");
+  await page.getByRole("combobox", { name: "Personalegruppe" }).selectOption("Jordemødre");
+  await expect(page.getByRole("row", { name: /Fødegang|Barselsafsnit/ }).first()).toBeVisible();
 });
