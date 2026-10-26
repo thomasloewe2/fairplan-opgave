@@ -4,7 +4,7 @@ import { DataTable } from "../components/DataTable";
 import { Button, ConfirmDialog, Dialog, Loading, Notice, PageHeader } from "../components/UI";
 import { useCrud } from "../hooks/useCrud";
 import { api, type Period, type PeriodInput } from "../services/apiService";
-import { formatPeriod } from "../utils/display";
+import { formatDate } from "../utils/display";
 
 function PeriodEditor({ initial, saving, error, onCancel, onSave }: {
   initial: PeriodInput;
@@ -48,8 +48,8 @@ export default function Periods() {
   const openEdit = (period: Period) => { setDialogKey(k => k + 1); crud.edit(period); };
   const columns = useMemo<ColumnDef<Period>[]>(() => [
     { accessorKey: "name", header: "Navn" },
-    { accessorKey: "startDate", header: "Startdato", cell: ctx => formatPeriod(ctx.row.original.startDate, ctx.row.original.startDate).slice(0, 10) },
-    { accessorKey: "endDate", header: "Slutdato", cell: ctx => formatPeriod(ctx.row.original.endDate, ctx.row.original.endDate).slice(0, 10) },
+    { accessorKey: "startDate", header: "Startdato", cell: ctx => formatDate(ctx.row.original.startDate) },
+    { accessorKey: "endDate", header: "Slutdato", cell: ctx => formatDate(ctx.row.original.endDate) },
     { id: "actions", header: "Handlinger", enableSorting: false, enableGlobalFilter: false,
       cell: ({ row }) => <div className="row-actions">
         <button type="button" onClick={() => openEdit(row.original)}>Rediger</button>

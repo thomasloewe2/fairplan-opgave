@@ -46,7 +46,7 @@ export default function Personnel() {
         <span className="readonly-label">Skrivebeskyttet oversigt</span>
       </div>
       <Notice message={periods.error || personnel.error} />
-      {(periods.loading || personnel.loading) && !personnel.data.length ? <Loading /> :
+      {(periods.loading || personnel.loading) ? <Loading /> :
         <DataTable data={periodId ? personnel.data : []} columns={columns}
           searchPlaceholder="Søg efter navn, afsnit eller personalegruppe…"
           emptyText={periodId ? "Ingen ansættelser overlapper den valgte periode." : "Opret en periode for at se personale."}

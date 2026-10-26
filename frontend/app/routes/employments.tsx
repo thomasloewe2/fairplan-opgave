@@ -8,7 +8,7 @@ import { useResource } from "../hooks/useResource";
 import {
   api, type Employment, type EmploymentInput, type Section, type StaffGroup, type User,
 } from "../services/apiService";
-import { formatPeriod } from "../utils/display";
+import { formatDate } from "../utils/display";
 
 function EmploymentForm({ initial, busy, error, cancel, save, users, sections, groups }: {
   initial: EmploymentInput; busy: boolean; error: string | null;
@@ -82,8 +82,8 @@ export default function Employments() {
     { id: "section", accessorFn: row => sectionName(row.sectionId), header: "Afsnit" },
     { id: "group", accessorFn: row => groupName(row.staffGroupId), header: "Personalegruppe" },
     { accessorKey: "hoursPerWeek", header: "Timer/uge", cell: ({ row }) => `${row.original.hoursPerWeek} timer` },
-    { accessorKey: "startDate", header: "Startdato", cell: ({ row }) => formatPeriod(row.original.startDate, row.original.startDate).slice(0, 10) },
-    { accessorKey: "endDate", header: "Slutdato", cell: ({ row }) => formatPeriod(row.original.endDate, row.original.endDate).slice(0, 10) },
+    { accessorKey: "startDate", header: "Startdato", cell: ({ row }) => formatDate(row.original.startDate) },
+    { accessorKey: "endDate", header: "Slutdato", cell: ({ row }) => formatDate(row.original.endDate) },
     { id: "actions", header: "Handlinger", enableSorting: false, enableGlobalFilter: false,
       cell: ({ row }) => <div className="row-actions">
         <button type="button" onClick={() => open(row.original)}>Rediger</button>

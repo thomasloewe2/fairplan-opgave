@@ -38,3 +38,14 @@ npm run build
 - Backendvalideringsfejl vises i formularerne
 
 Login er uden for denne hjemmeopgaves scope.
+
+## Browserintegrationstests
+
+Playwright-testene i `tests/app.spec.ts` kontrollerer brugerflows mod et kørende .NET API og SQL Server. Da testene opretter og sletter data, skal de køres på en separat udviklings-/testdatabase.
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+CI kan køre samme browserintegration automatisk ved Pull Requests.
