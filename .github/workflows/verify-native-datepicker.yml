@@ -1,0 +1,81 @@
+name: Verify native date picker (temporary)
+
+on:
+  push:
+    branches:
+      - feature/frontend
+    paths:
+      - '.github/workflows/verify-native-datepicker.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: 'TemporaryStrongPassw0rd!'
+        ports:
+          - 1433:1433
+    env:
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1,1433;Database=FairPlanUiE2e;User Id=sa;Password=TemporaryStrongPassw0rd!;Encrypt=True;TrustServerCertificate=True'
+      ASPNETCORE_ENVIRONMENT: Development
+      VITE_API_BASE_URL: http://localhost:5166
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install frontend and build all projects
+        run: |
+          cd frontend && npm ci && npm run typecheck && npm run build && cd ..
+          dotnet restore backend/backend.sln
+          dotnet build backend/backend.sln --configuration Release --no-restore
+          dotnet test backend/backend.sln --configuration Release --no-build
+      - name: Start API and confirm SQL database + seed
+        run: |
+          dotnet run --project backend/src/WebAPI/WebAPI.csproj \
+            --no-build --configuration Release --no-launch-profile --urls http://localhost:5166 \
+            >/tmp/fairplan-api.log 2>&1 &
+          echo $! >/tmp/fairplan-api.pid
+          for attempt in $(seq 1 45); do
+            if curl -fsS http://localhost:5166/api/periods >/tmp/periods.json; then
+              jq -e 'length == 2' /tmp/periods.json
+              exit 0
+            fi
+            sleep 3
+          done
+          cat /tmp/fairplan-api.log
+          exit 1
+      - name: Start React dev server
+        run: |
+          cd frontend
+          npm run dev -- --host localhost --port 5173 >/tmp/fairplan-vite.log 2>&1 &
+          echo $! >/tmp/fairplan-vite.pid
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:5173/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/fairplan-vite.log
+          exit 1
+      - name: Install Chromium and browser dependencies
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Run browser E2E scenarios
+        working-directory: frontend
+        run: npm run test:e2e
+      - name: Upload browser traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-e2e-traces
+          path: frontend/test-results/
+          if-no-files-found: ignore
