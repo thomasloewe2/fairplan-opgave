@@ -19,7 +19,7 @@ const menu: { to: string; label: string; icon: AppIconName; end?: boolean }[] = 
   { to: "/", label: "Overblik", icon: "dashboard", end: true },
   { to: "/perioder", label: "Perioder", icon: "calendar" },
   { to: "/organisering", label: "Organisering", icon: "building" },
-  { to: "/adgangsstyring/brugere", label: "Adgange", icon: "shield" },
+  { to: "/adgangsstyring/brugere", label: "Adgangsstyring", icon: "shield" },
   { to: "/adgangsstyring/ansaettelser", label: "Ansættelser", icon: "briefcase" },
   { to: "/personale", label: "Personale", icon: "users" },
 ];
